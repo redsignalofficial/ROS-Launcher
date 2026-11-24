@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -139,7 +140,10 @@ public class LocalLobbyService : ILobbyService
             }
 
             // Truncate safely, preserving remaining slots
-            room.Slots = room.Slots.Take(targetCapacity).ToList();
+            while (room.Slots.Count > targetCapacity)
+            {
+                room.Slots.RemoveAt(room.Slots.Count - 1);
+            }
             room.MaxPlayers = targetCapacity;
             room.SelectedMode = newMode;
             room.LastModified = DateTime.UtcNow;
@@ -262,7 +266,7 @@ public class LocalLobbyService : ILobbyService
             MaxPlayers = 4,
             CreatedAt = DateTime.UtcNow,
             LastModified = DateTime.UtcNow,
-            Slots = new List<LobbySlot>
+            Slots = new ObservableCollection<LobbySlot>
             {
                 LobbySlot.CreateHost(host),
                 LobbySlot.CreateOpen(2),

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -145,6 +146,8 @@ public class MainViewModel : ViewModelBase
                 OnPropertyChanged(nameof(GameStatusSummary));
                 OnPropertyChanged(nameof(CanPlay));
                 OnPropertyChanged(nameof(CanStartMatch));
+                OnPropertyChanged(nameof(IsStartMatchDisabled));
+                OnPropertyChanged(nameof(StartMatchTooltipText));
                 OnPropertyChanged(nameof(LastIntegrityCheckText));
                 OnPropertyChanged(nameof(MissingFilesText));
                 OnPropertyChanged(nameof(HasMissingFiles));
@@ -181,10 +184,16 @@ public class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPerspectiveFpp));
     }
 
-    public IReadOnlyList<LobbySlot> Slots => Lobby.Slots;
+    public ObservableCollection<LobbySlot> Slots => Lobby.Slots;
     public bool CanAddBot => Lobby.Slots.Any(s => !s.IsOccupied);
     public string LobbyRoomIdText => $"ROOM #{Lobby.RoomId}";
     public string LobbyStatusSummary => $"Map: {Lobby.SelectedMap}  •  Mode: {Lobby.SelectedMode} ({Lobby.MaxPlayers}P)  •  Perspective: {Lobby.Perspective}  •  Slots: {Lobby.OccupiedCount}/{Lobby.MaxPlayers}";
+
+    public bool IsStartMatchDisabled => !CanStartMatch;
+    public string StartMatchTooltipText =>
+        CanStartMatch
+            ? "Launch original Rules of Survival client with custom lobby parameters."
+            : "Cannot start match: ROS game directory not configured or ros.exe is missing. Configure game path in Settings or Home.";
 
     public bool IsMapGhillie => Lobby.SelectedMap == "Ghillie Island";
     public bool IsMapFearless => Lobby.SelectedMap == "Fearless Fiord";
@@ -230,6 +239,8 @@ public class MainViewModel : ViewModelBase
             {
                 OnPropertyChanged(nameof(CanPlay));
                 OnPropertyChanged(nameof(CanStartMatch));
+                OnPropertyChanged(nameof(IsStartMatchDisabled));
+                OnPropertyChanged(nameof(StartMatchTooltipText));
             }
         }
     }

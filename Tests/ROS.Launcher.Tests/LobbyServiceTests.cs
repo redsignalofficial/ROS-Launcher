@@ -181,7 +181,7 @@ public class LobbyServiceTests : IDisposable
     {
         var service = new LocalLobbyService(_logger, _testDir);
         var room = service.CreateDefaultLobby("SoloPlayer");
-        room.Slots = new List<LobbySlot> { LobbySlot.CreateHost("SoloPlayer") };
+        room.Slots = new System.Collections.ObjectModel.ObservableCollection<LobbySlot> { LobbySlot.CreateHost("SoloPlayer") };
         room.SelectedMode = "Solo";
         room.MaxPlayers = 1;
 

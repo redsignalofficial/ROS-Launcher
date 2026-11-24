@@ -4,9 +4,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:ROS.Launcher.ViewModels"
         Title="ROS Revival Launcher"
-        Height="700" Width="1080"
-        MinHeight="640" MinWidth="940"
+        Height="660" Width="980"
+        MinHeight="600" MinWidth="880"
         WindowStartupLocation="CenterScreen"
+        Topmost="True"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent">
@@ -91,7 +92,7 @@
             <!-- 2. Main Body Grid (Sidebar + Content) -->
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220" /> <!-- Navigation Sidebar -->
+                    <ColumnDefinition Width="200" /> <!-- Navigation Sidebar -->
                     <ColumnDefinition Width="*" />   <!-- Page Content Area -->
                 </Grid.ColumnDefinitions>
 
@@ -155,7 +156,7 @@
                 <ScrollViewer Grid.Column="1"
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <Grid Margin="28">
+                    <Grid Margin="18,14">
 
                         <!-- TAB 1: HOME VIEW -->
                         <StackPanel Visibility="{Binding IsHomeActive, Converter={StaticResource BoolToVis}}">
@@ -194,7 +195,9 @@
                                         <Button Style="{StaticResource PlayButtonStyle}"
                                                 Content="▶  PLAY"
                                                 Command="{Binding PlayGameCommand}"
-                                                IsEnabled="{Binding CanPlay}" />
+                                                IsEnabled="{Binding CanPlay}"
+                                                ToolTipService.ShowOnDisabled="True"
+                                                ToolTip="{Binding StartMatchTooltipText}" />
                                         <TextBlock Text="{Binding LaunchStatus}"
                                                    Foreground="{StaticResource TextSecondaryBrush}"
                                                    FontSize="11"
@@ -434,13 +437,23 @@
                                                 Cursor="Hand"
                                                 FontWeight="SemiBold"
                                                 FontSize="12" />
-                                        <Button Style="{StaticResource PlayButtonStyle}"
-                                                Content="▶  START MATCH"
-                                                AutomationProperties.AutomationId="BtnStartMatch"
-                                                Command="{Binding StartMatchCommand}"
-                                                IsEnabled="{Binding CanStartMatch}"
-                                                Padding="24,10"
-                                                FontSize="13" />
+                                        <StackPanel VerticalAlignment="Center">
+                                            <Button Style="{StaticResource PlayButtonStyle}"
+                                                    Content="▶  START MATCH"
+                                                    AutomationProperties.AutomationId="BtnStartMatch"
+                                                    Command="{Binding StartMatchCommand}"
+                                                    IsEnabled="{Binding CanStartMatch}"
+                                                    ToolTipService.ShowOnDisabled="True"
+                                                    ToolTip="{Binding StartMatchTooltipText}"
+                                                    Padding="20,10"
+                                                    FontSize="13" />
+                                            <TextBlock Text="ROS Installation Required"
+                                                       Foreground="{StaticResource StatusAmberBrush}"
+                                                       FontSize="9"
+                                                       HorizontalAlignment="Center"
+                                                       Margin="0,4,0,0"
+                                                       Visibility="{Binding IsStartMatchDisabled, Converter={StaticResource BoolToVis}}" />
+                                        </StackPanel>
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -495,8 +508,8 @@
                             <!-- Main Lobby Grid: Match Parameters (Left) & Team Roster (Right) -->
                             <Grid Margin="0,0,0,16">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="360" />
-                                    <ColumnDefinition Width="16" />
+                                    <ColumnDefinition Width="310" />
+                                    <ColumnDefinition Width="14" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
@@ -792,6 +805,7 @@
                                                                     Content="Clear"
                                                                     Command="{Binding DataContext.ClearSlotCommand, ElementName=RootWindow}"
                                                                     CommandParameter="{Binding SlotNumber}"
+                                                                    Visibility="{Binding CanClear, Converter={StaticResource BoolToVis}}"
                                                                     Background="Transparent"
                                                                     Foreground="{StaticResource StatusRedBrush}"
                                                                     BorderThickness="0"
@@ -947,6 +961,7 @@
 
                     <TextBlock Grid.Column="0"
                                Text="{Binding StatusMessage}"
+                               TextTrimming="CharacterEllipsis"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                FontSize="11"
                                VerticalAlignment="Center" />

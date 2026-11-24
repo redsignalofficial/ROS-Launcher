@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace ROS.Launcher.Models;
@@ -17,7 +17,7 @@ public class LobbyRoom
     public string SelectedMode { get; set; } = "Squad"; // Solo, Duo, Squad, Fireteam
     public string Perspective { get; set; } = "TPP"; // TPP, FPP
     public int MaxPlayers { get; set; } = 4;
-    public List<LobbySlot> Slots { get; set; } = new();
+    public ObservableCollection<LobbySlot> Slots { get; set; } = new();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastModified { get; set; } = DateTime.UtcNow;
 

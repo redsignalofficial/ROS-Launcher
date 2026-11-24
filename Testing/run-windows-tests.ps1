@@ -65,11 +65,62 @@ if (-not (Test-Path $launcherExe)) {
 $testResults["BUILD_VERIFY"] = "PASS"
 Write-Host "[PASS] Launcher executable verified at $launcherExe" -ForegroundColor Green
 
-# 4. Helper Function: Screenshot Capture
+# 4. Helper Assemblies & Functions
 Add-Type -AssemblyName System.Windows.Forms -ErrorAction SilentlyContinue
 Add-Type -AssemblyName System.Drawing -ErrorAction SilentlyContinue
 Add-Type -AssemblyName UIAutomationClient -ErrorAction SilentlyContinue
 Add-Type -AssemblyName UIAutomationTypes -ErrorAction SilentlyContinue
+
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public class Win32Helper {
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool BringWindowToTop(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern void SwitchToThisWindow(IntPtr hWnd, bool fUnknown);
+}
+"@
+
+function Focus-LauncherWindow([System.Diagnostics.Process]$proc) {
+    if ($proc -and (-not $proc.HasExited)) {
+        try {
+            $proc.Refresh()
+            $h = $proc.MainWindowHandle
+            $retries = 0
+            while ($h -eq [IntPtr]::Zero -and $retries -lt 15) {
+                Start-Sleep -Milliseconds 250
+                $proc.Refresh()
+                $h = $proc.MainWindowHandle
+                $retries++
+            }
+            if ($h -ne [IntPtr]::Zero) {
+                # SW_RESTORE = 9
+                [Win32Helper]::ShowWindow($h, 9) | Out-Null
+                # HWND_TOPMOST = [IntPtr]-1, SWP_SHOWWINDOW = 0x0040
+                [Win32Helper]::SetWindowPos($h, [IntPtr](-1), 20, 20, 980, 660, 0x0040) | Out-Null
+                [Win32Helper]::BringWindowToTop($h) | Out-Null
+                [Win32Helper]::SetForegroundWindow($h) | Out-Null
+                [Win32Helper]::SwitchToThisWindow($h, $true)
+                Start-Sleep -Milliseconds 500
+            }
+        } catch { }
+    }
+}
 
 function Capture-DesktopScreenshot([string]$outputPath, [string]$label) {
     try {
@@ -90,19 +141,24 @@ function Capture-DesktopScreenshot([string]$outputPath, [string]$label) {
 }
 
 function Get-LauncherWindow([int]$procId) {
-    try {
-        $cond = New-Object System.Windows.Automation.PropertyCondition(
-            [System.Windows.Automation.AutomationElement]::ProcessIdProperty,
-            $procId
-        )
-        return [System.Windows.Automation.AutomationElement]::RootElement.FindFirst(
-            [System.Windows.Automation.TreeScope]::Children,
-            $cond
-        )
+    $retries = 0
+    while ($retries -lt 15) {
+        try {
+            $cond = New-Object System.Windows.Automation.PropertyCondition(
+                [System.Windows.Automation.AutomationElement]::ProcessIdProperty,
+                $procId
+            )
+            $w = [System.Windows.Automation.AutomationElement]::RootElement.FindFirst(
+                [System.Windows.Automation.TreeScope]::Children,
+                $cond
+            )
+            if ($w) { return $w }
+        }
+        catch { }
+        Start-Sleep -Milliseconds 300
+        $retries++
     }
-    catch {
-        return $null
-    }
+    return $null
 }
 
 function Click-AutomationButton([System.Windows.Automation.AutomationElement]$root, [string]$automationId, [string]$fallbackName) {
@@ -128,7 +184,7 @@ function Click-AutomationButton([System.Windows.Automation.AutomationElement]$ro
             if ($target.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invokePattern)) {
                 $invokePattern.Invoke()
                 Write-Host "[UI-AUTO] Clicked button: Id='$automationId', Name='$fallbackName'" -ForegroundColor Green
-                Start-Sleep -Milliseconds 600
+                Start-Sleep -Milliseconds 700
                 return $true
             }
         }
@@ -178,24 +234,24 @@ try {
     Write-Host "[STARTUP] Launcher process started with PID: $($launcherProcess.Id)" -ForegroundColor Green
     $testResults["LAUNCHER_STARTUP"] = "PASS"
 
-    # Allow window to initialize and render
-    Start-Sleep -Seconds 3
-
-    # Capture 1: Home View Initial Interface
-    $shot1 = Join-Path $screenshotsDir "01_home_initial_view.png"
-    if (Capture-DesktopScreenshot $shot1 "Home View") { $screenCount++ }
-
-    # Obtain UI Automation Window Handle
+    # Allow window to initialize, locate automation element, position, and bring to foreground
     $win = Get-LauncherWindow $launcherProcess.Id
     if ($win) {
         Write-Host "[UI-AUTO] Located Launcher Window element in automation tree." -ForegroundColor Green
     } else {
         Write-Warning "[UI-AUTO] Could not locate window element directly; proceeding with visual sampling."
     }
+    Focus-LauncherWindow $launcherProcess
+    Start-Sleep -Milliseconds 800
+
+    # Capture 1: Home View Initial Interface (Ensured in foreground)
+    $shot1 = Join-Path $screenshotsDir "01_home_initial_view.png"
+    if (Capture-DesktopScreenshot $shot1 "Home View") { $screenCount++ }
 
     # Step 1: Navigate to Custom Lobby
     $navLobby = Click-AutomationButton $win "BtnNavLobby" "⚔  CUSTOM LOBBY"
-    Start-Sleep -Seconds 1
+    Start-Sleep -Milliseconds 800
+    Focus-LauncherWindow $launcherProcess
     $shot2 = Join-Path $screenshotsDir "02_custom_lobby_default.png"
     if (Capture-DesktopScreenshot $shot2 "Custom Lobby Initial View") { $screenCount++ }
     $testResults["CUSTOM_LOBBY_NAV"] = if ($navLobby) { "PASS" } else { "PASS_VISUAL" }
@@ -203,36 +259,42 @@ try {
     # Step 2: Map Selection (Fearless Fiord)
     $mapClicked = Click-AutomationButton $win "BtnMapFearless" "Fearless Fiord"
     Start-Sleep -Milliseconds 600
+    Focus-LauncherWindow $launcherProcess
     $shot3 = Join-Path $screenshotsDir "03_lobby_map_selected.png"
     if (Capture-DesktopScreenshot $shot3 "Map Selected (Fearless Fiord)") { $screenCount++ }
     $testResults["MAP_SELECTION"] = if ($mapClicked) { "PASS" } else { "PASS_VISUAL" }
 
-    # Step 3: Add Visual Bot Slots (Slots 2 & 3)
+    # Step 3: Add Visual Bot Slots (Slot 2 & Slot 3)
     $bot1 = Click-AutomationButton $win "BtnAddBot" "+ Add Visual Bot"
-    Start-Sleep -Milliseconds 400
+    Start-Sleep -Milliseconds 800
     $bot2 = Click-AutomationButton $win "BtnAddBot" "+ Add Visual Bot"
-    Start-Sleep -Milliseconds 600
+    Start-Sleep -Milliseconds 800
+    Focus-LauncherWindow $launcherProcess
     $shot4 = Join-Path $screenshotsDir "04_lobby_visual_bots_added.png"
     if (Capture-DesktopScreenshot $shot4 "Visual Bots Added to Roster") { $screenCount++ }
-    $testResults["VISUAL_BOT_SLOTS"] = if ($bot1 -or $bot2) { "PASS" } else { "PASS_VISUAL" }
+    $testResults["VISUAL_BOT_SLOTS"] = if ($bot1 -and $bot2) { "PASS" } else { "PASS_VISUAL" }
 
     # Step 4: Capacity Reduction Warning (Squad [4] -> Duo [2] with occupied slot 3)
+    # Notice: Slots 2 and 3 are visibly occupied; reducing to Duo triggers warning prompt
     $modeDuo = Click-AutomationButton $win "BtnModeDuo" "Duo"
-    Start-Sleep -Milliseconds 600
+    Start-Sleep -Milliseconds 800
+    Focus-LauncherWindow $launcherProcess
     $shot5 = Join-Path $screenshotsDir "05_lobby_capacity_warning.png"
     if (Capture-DesktopScreenshot $shot5 "Capacity Reduction Warning Prompt") { $screenCount++ }
     $testResults["CAPACITY_WARNING"] = if ($modeDuo) { "PASS" } else { "PASS_VISUAL" }
 
-    # Step 5: Confirm Truncation
+    # Step 5: Confirm Truncation (Removes excess occupied slot 3, preserves slot 2)
     $confirmTrunc = Click-AutomationButton $win "BtnConfirmTruncate" "Confirm & Truncate"
-    Start-Sleep -Milliseconds 600
+    Start-Sleep -Milliseconds 800
+    Focus-LauncherWindow $launcherProcess
     $shot6 = Join-Path $screenshotsDir "06_lobby_capacity_truncated.png"
     if (Capture-DesktopScreenshot $shot6 "Capacity Truncated to Duo") { $screenCount++ }
     $testResults["CAPACITY_CONFIRM"] = if ($confirmTrunc) { "PASS" } else { "PASS_VISUAL" }
 
     # Step 6: Create New Room (Generates fresh 6-digit local Room ID)
     $newRoom = Click-AutomationButton $win "BtnNewRoom" "New Room"
-    Start-Sleep -Milliseconds 600
+    Start-Sleep -Milliseconds 800
+    Focus-LauncherWindow $launcherProcess
     $shot7 = Join-Path $screenshotsDir "07_lobby_new_room_created.png"
     if (Capture-DesktopScreenshot $shot7 "New Room Created (6-digit ID)") { $screenCount++ }
     $testResults["ROOM_CREATION"] = if ($newRoom) { "PASS" } else { "PASS_VISUAL" }
@@ -240,6 +302,7 @@ try {
     # Step 7: Perspective Selection (FPP)
     $perspFpp = Click-AutomationButton $win "BtnPerspFpp" "FPP (First-Person)"
     Start-Sleep -Milliseconds 600
+    Focus-LauncherWindow $launcherProcess
     $shot8 = Join-Path $screenshotsDir "08_lobby_perspective_fpp.png"
     if (Capture-DesktopScreenshot $shot8 "FPP Perspective Selected") { $screenCount++ }
     $testResults["PERSPECTIVE_SELECTION"] = if ($perspFpp) { "PASS" } else { "PASS_VISUAL" }
@@ -247,6 +310,7 @@ try {
     # Step 8: Save Lobby Preset
     $saveLobby = Click-AutomationButton $win "BtnSaveLobby" "Save Lobby Preset"
     Start-Sleep -Milliseconds 600
+    Focus-LauncherWindow $launcherProcess
     $shot9 = Join-Path $screenshotsDir "09_lobby_preset_saved.png"
     if (Capture-DesktopScreenshot $shot9 "Lobby Preset Saved") { $screenCount++ }
     $testResults["LOBBY_PERSISTENCE"] = if ($saveLobby) { "PASS" } else { "PASS_VISUAL" }
