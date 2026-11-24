@@ -1,0 +1,104 @@
+name: Windows Real-Play & Visual Evidence Testing
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-runtime-test:
+    name: Windows GUI Runtime & Evidence Collection
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore NuGet Packages
+        run: dotnet restore ROS-Revival.sln
+
+      - name: Run Unit & Integration Tests
+        run: |
+          dotnet test Tests/ROS.Launcher.Tests/ROS.Launcher.Tests.csproj `
+            --configuration Release `
+            --logger "trx;LogFileName=TestResults.trx" `
+            --logger "console;verbosity=normal"
+
+      - name: Publish Windows x64 Launcher
+        run: |
+          dotnet publish Launcher/ROS.Launcher/ROS.Launcher.csproj `
+            --configuration Release `
+            --framework net8.0-windows `
+            --runtime win-x64 `
+            --self-contained false `
+            -p:PublishSingleFile=true `
+            --output ./artifacts/publish
+
+      - name: Execute Windows Real-Play & Evidence Runner
+        shell: pwsh
+        run: |
+          ./Testing/run-windows-tests.ps1 -PublishDir "./artifacts/publish" -EvidenceDir "./Testing/Evidence"
+
+      - name: Upload Artifact - ROS-REVIVAL-Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-REVIVAL-Build
+          path: ./artifacts/publish/
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload Artifact - ROS-REVIVAL-Test-Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-REVIVAL-Test-Reports
+          path: |
+            ./Testing/Evidence/Reports/
+            **/TestResults.trx
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-REVIVAL-Screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-REVIVAL-Screenshots
+          path: ./Testing/Evidence/Screenshots/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-REVIVAL-Videos
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-REVIVAL-Videos
+          path: ./Testing/Evidence/Videos/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-REVIVAL-Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-REVIVAL-Logs
+          path: ./Testing/Evidence/Logs/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Append Test Results to Step Summary
+        shell: pwsh
+        run: |
+          $reportPath = "./Testing/Evidence/Reports/Windows-Run-Report.md"
+          if (Test-Path $reportPath) {
+            Get-Content -Path $reportPath | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          } else {
+            "## ⚠️ Test Report Not Found" >> $env:GITHUB_STEP_SUMMARY
+          }
