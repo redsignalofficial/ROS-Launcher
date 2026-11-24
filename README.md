@@ -31,6 +31,7 @@ ROS REVIVAL is a community-driven initiative dedicated to preserving the authent
   - Clean "Start Match" execution without unofficial command-line parameters.
 - **Diagnostic Logging**: Automated activity logs saved to `%LOCALAPPDATA%\ROSRevival\Logs\launcher.log`.
 - **Comprehensive Automated Tests**: 34 unit and integration tests verifying configurations, detection, launch, and lobby persistence.
+- **Milestone 3.1 Verification**: Published Windows x64 build tested in live Windows environment with 9 genuine desktop evidence screenshots, zero unhandled errors, and byte-for-byte game file immutability verified.
 
 ---
 
@@ -59,7 +60,9 @@ ROS-REVIVAL/
 │   ├── Compatibility.md
 │   ├── Cloud-Windows-GPU-Testing-Plan.md
 │   ├── ROS-Real-Launch-Test-Report.md
-│   └── Volunteer-Runner-Security-Guide.md
+│   ├── Volunteer-Runner-Security-Guide.md
+│   ├── Milestone-3-1-Verification-Report.md
+│   └── Screenshots/
 ├── .gitignore
 ├── global.json
 ├── README.md
