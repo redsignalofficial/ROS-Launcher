@@ -320,4 +320,54 @@ public class LobbyServiceTests : IDisposable
         Assert.Equal(5, loaded.Slots.Count);
         Assert.Equal(1, loaded.BotCount);
     }
+
+    [Theory]
+    [InlineData("Solo", 1)]
+    [InlineData("Duo", 2)]
+    [InlineData("Squad", 4)]
+    [InlineData("Fireteam", 5)]
+    public void ChangeMode_AlwaysSetsExactModeAndCapacityInLockstep(string targetMode, int expectedCapacity)
+    {
+        var service = new LocalLobbyService(_logger, _testDir);
+        var room = service.CreateDefaultLobby("TestHost");
+
+        var result = service.ChangeMode(room, targetMode, confirmTruncate: true);
+
+        Assert.Equal(CapacityChangeStatus.Success, result.Status);
+        Assert.Equal(targetMode, room.SelectedMode);
+        Assert.Equal(expectedCapacity, room.MaxPlayers);
+        Assert.Equal(expectedCapacity, room.Slots.Count);
+        Assert.Equal(expectedCapacity, LobbyRoom.GetModeCapacity(targetMode));
+    }
+
+    [Fact]
+    public void LobbyRoom_PerspectiveAndMap_MaintainStateConsistency()
+    {
+        var service = new LocalLobbyService(_logger, _testDir);
+        var room = service.CreateDefaultLobby("TestHost");
+
+        // Verify default state
+        Assert.Equal("Ghillie Island", room.SelectedMap);
+        Assert.Equal("Squad", room.SelectedMode);
+        Assert.Equal("TPP", room.Perspective);
+        Assert.Equal(4, room.MaxPlayers);
+
+        // Transition Map
+        room.SelectedMap = "Fearless Fiord";
+        Assert.Equal("Fearless Fiord", room.SelectedMap);
+
+        // Transition Perspective
+        room.Perspective = "FPP";
+        Assert.Equal("FPP", room.Perspective);
+
+        // Transition Mode to Duo
+        service.ChangeMode(room, "Duo", confirmTruncate: true);
+        Assert.Equal("Duo", room.SelectedMode);
+        Assert.Equal(2, room.MaxPlayers);
+        Assert.Equal(2, room.Slots.Count);
+
+        // Summary representation
+        string summary = $"Map: {room.SelectedMap}  •  Mode: {room.SelectedMode} ({room.MaxPlayers}P)  •  Perspective: {room.Perspective}  •  Slots: {room.OccupiedCount}/{room.MaxPlayers}";
+        Assert.Equal("Map: Fearless Fiord  •  Mode: Duo (2P)  •  Perspective: FPP  •  Slots: 1/2", summary);
+    }
 }

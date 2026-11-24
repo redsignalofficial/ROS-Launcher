@@ -544,12 +544,18 @@
                                             <Button Grid.Column="0"
                                                     Command="{Binding SelectMapCommand}"
                                                     CommandParameter="Ghillie Island"
-                                                    AutomationProperties.AutomationId="BtnMapGhillie"
-                                                    Background="#1A202C"
-                                                    BorderBrush="{StaticResource BorderDarkBrush}"
-                                                    BorderThickness="1"
-                                                    Padding="8"
-                                                    Cursor="Hand">
+                                                    AutomationProperties.AutomationId="BtnMapGhillie">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource MapCardButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsMapGhillie}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
                                                 <StackPanel HorizontalAlignment="Center">
                                                     <TextBlock Text="Ghillie Island"
                                                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -572,12 +578,18 @@
                                             <Button Grid.Column="2"
                                                     Command="{Binding SelectMapCommand}"
                                                     CommandParameter="Fearless Fiord"
-                                                    AutomationProperties.AutomationId="BtnMapFearless"
-                                                    Background="#1A202C"
-                                                    BorderBrush="{StaticResource BorderDarkBrush}"
-                                                    BorderThickness="1"
-                                                    Padding="8"
-                                                    Cursor="Hand">
+                                                    AutomationProperties.AutomationId="BtnMapFearless">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource MapCardButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsMapFearless}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
                                                 <StackPanel HorizontalAlignment="Center">
                                                     <TextBlock Text="Fearless Fiord"
                                                                Foreground="{StaticResource TextPrimaryBrush}"
@@ -618,46 +630,78 @@
                                                     Content="Solo"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Solo"
-                                                    AutomationProperties.AutomationId="BtnModeSolo"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="4,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnModeSolo">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsModeSolo}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                             <Button Grid.Column="2"
                                                     Content="Duo"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Duo"
-                                                    AutomationProperties.AutomationId="BtnModeDuo"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="4,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnModeDuo">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsModeDuo}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                             <Button Grid.Column="4"
                                                     Content="Squad"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Squad"
-                                                    AutomationProperties.AutomationId="BtnModeSquad"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="4,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnModeSquad">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsModeSquad}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                             <Button Grid.Column="6"
                                                     Content="Fireteam"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Fireteam"
-                                                    AutomationProperties.AutomationId="BtnModeFireteam"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="4,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnModeFireteam">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsModeFireteam}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                         </Grid>
 
                                         <!-- Perspective Selection -->
@@ -677,24 +721,42 @@
                                                     Content="TPP (Third-Person)"
                                                     Command="{Binding SelectPerspectiveCommand}"
                                                     CommandParameter="TPP"
-                                                    AutomationProperties.AutomationId="BtnPerspTpp"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="6,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnPerspTpp">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Setter Property="Padding" Value="6,6" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsPerspectiveTpp}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                             <Button Grid.Column="2"
                                                     Content="FPP (First-Person)"
                                                     Command="{Binding SelectPerspectiveCommand}"
                                                     CommandParameter="FPP"
-                                                    AutomationProperties.AutomationId="BtnPerspFpp"
-                                                    Background="#252C37"
-                                                    Foreground="{StaticResource TextPrimaryBrush}"
-                                                    BorderThickness="0"
-                                                    Padding="6,6"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                                    AutomationProperties.AutomationId="BtnPerspFpp">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource SelectableButtonStyle}">
+                                                        <Setter Property="Padding" Value="6,6" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsPerspectiveFpp}" Value="True">
+                                                                <Setter Property="Background" Value="#1C3847" />
+                                                                <Setter Property="BorderBrush" Value="{StaticResource StatusCyanBrush}" />
+                                                                <Setter Property="BorderThickness" Value="1.5" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                                <Setter Property="FontWeight" Value="Bold" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
                                         </Grid>
 
                                         <!-- Save / Persistence Action -->
