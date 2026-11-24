@@ -105,18 +105,22 @@
                         <StackPanel DockPanel.Dock="Top" Margin="12,20,12,0">
                             <Button Style="{StaticResource NavButtonStyle}"
                                     Content="⌂  HOME"
+                                    AutomationProperties.AutomationId="BtnNavHome"
                                     Command="{Binding SelectHomeCommand}"
                                     Margin="0,0,0,6" />
                             <Button Style="{StaticResource NavButtonStyle}"
                                     Content="⚔  CUSTOM LOBBY"
+                                    AutomationProperties.AutomationId="BtnNavLobby"
                                     Command="{Binding SelectLobbyCommand}"
                                     Margin="0,0,0,6" />
                             <Button Style="{StaticResource NavButtonStyle}"
                                     Content="⚙  SETTINGS"
+                                    AutomationProperties.AutomationId="BtnNavSettings"
                                     Command="{Binding SelectSettingsCommand}"
                                     Margin="0,0,0,6" />
                             <Button Style="{StaticResource NavButtonStyle}"
                                     Content="ℹ  ABOUT"
+                                    AutomationProperties.AutomationId="BtnNavAbout"
                                     Command="{Binding SelectAboutCommand}"
                                     Margin="0,0,0,6" />
                         </StackPanel>
@@ -420,6 +424,7 @@
                                     <!-- Right: Action Buttons -->
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                         <Button Content="New Room"
+                                                AutomationProperties.AutomationId="BtnNewRoom"
                                                 Command="{Binding CreateLobbyCommand}"
                                                 Background="#252C37"
                                                 Foreground="{StaticResource TextPrimaryBrush}"
@@ -431,6 +436,7 @@
                                                 FontSize="12" />
                                         <Button Style="{StaticResource PlayButtonStyle}"
                                                 Content="▶  START MATCH"
+                                                AutomationProperties.AutomationId="BtnStartMatch"
                                                 Command="{Binding StartMatchCommand}"
                                                 IsEnabled="{Binding CanStartMatch}"
                                                 Padding="24,10"
@@ -465,6 +471,7 @@
                                     </StackPanel>
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                         <Button Content="Confirm &amp; Truncate"
+                                                AutomationProperties.AutomationId="BtnConfirmTruncate"
                                                 Command="{Binding ConfirmChangeModeCommand}"
                                                 Background="{StaticResource StatusAmberBrush}"
                                                 Foreground="#000000"
@@ -474,6 +481,7 @@
                                                 Cursor="Hand"
                                                 Margin="10,0,6,0" />
                                         <Button Content="Cancel"
+                                                AutomationProperties.AutomationId="BtnCancelTruncate"
                                                 Command="{Binding CancelChangeModeCommand}"
                                                 Background="#252C37"
                                                 Foreground="{StaticResource TextPrimaryBrush}"
@@ -523,6 +531,7 @@
                                             <Button Grid.Column="0"
                                                     Command="{Binding SelectMapCommand}"
                                                     CommandParameter="Ghillie Island"
+                                                    AutomationProperties.AutomationId="BtnMapGhillie"
                                                     Background="#1A202C"
                                                     BorderBrush="{StaticResource BorderDarkBrush}"
                                                     BorderThickness="1"
@@ -550,6 +559,7 @@
                                             <Button Grid.Column="2"
                                                     Command="{Binding SelectMapCommand}"
                                                     CommandParameter="Fearless Fiord"
+                                                    AutomationProperties.AutomationId="BtnMapFearless"
                                                     Background="#1A202C"
                                                     BorderBrush="{StaticResource BorderDarkBrush}"
                                                     BorderThickness="1"
@@ -595,6 +605,7 @@
                                                     Content="Solo"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Solo"
+                                                    AutomationProperties.AutomationId="BtnModeSolo"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -605,6 +616,7 @@
                                                     Content="Duo"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Duo"
+                                                    AutomationProperties.AutomationId="BtnModeDuo"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -615,6 +627,7 @@
                                                     Content="Squad"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Squad"
+                                                    AutomationProperties.AutomationId="BtnModeSquad"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -625,6 +638,7 @@
                                                     Content="Fireteam"
                                                     Command="{Binding SelectModeCommand}"
                                                     CommandParameter="Fireteam"
+                                                    AutomationProperties.AutomationId="BtnModeFireteam"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -650,6 +664,7 @@
                                                     Content="TPP (Third-Person)"
                                                     Command="{Binding SelectPerspectiveCommand}"
                                                     CommandParameter="TPP"
+                                                    AutomationProperties.AutomationId="BtnPerspTpp"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -660,6 +675,7 @@
                                                     Content="FPP (First-Person)"
                                                     Command="{Binding SelectPerspectiveCommand}"
                                                     CommandParameter="FPP"
+                                                    AutomationProperties.AutomationId="BtnPerspFpp"
                                                     Background="#252C37"
                                                     Foreground="{StaticResource TextPrimaryBrush}"
                                                     BorderThickness="0"
@@ -670,6 +686,7 @@
 
                                         <!-- Save / Persistence Action -->
                                         <Button Content="Save Lobby Preset"
+                                                AutomationProperties.AutomationId="BtnSaveLobby"
                                                 Command="{Binding SaveLobbyCommand}"
                                                 Background="#252C37"
                                                 Foreground="{StaticResource TextPrimaryBrush}"
@@ -708,6 +725,7 @@
                                                        VerticalAlignment="Center" />
                                             <Button Grid.Column="1"
                                                     Content="+ Add Visual Bot"
+                                                    AutomationProperties.AutomationId="BtnAddBot"
                                                     Command="{Binding AddBotCommand}"
                                                     IsEnabled="{Binding CanAddBot}"
                                                     Background="#252C37"
