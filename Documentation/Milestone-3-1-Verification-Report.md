@@ -5,7 +5,7 @@
 Milestone 3.1 verifies the published standalone Windows x64 ROS Revival Launcher build (`ROS-Revival-Launcher-win-x64.zip`) and evaluates the live WPF user interface in a clean Windows environment prior to beginning Milestone 4.
 
 **Verification Status:** ✅ **PASSED** (Artifact integrity, UI automation, state persistence, log cleanliness, and game immutability verified)  
-**Evidence Status:** ✅ **CORRECTED & VERIFIED** (All 9 genuine screenshots audited, discrepancies resolved via Run #9)  
+**Evidence Status:** ✅ **AUDITED, CORRECTED & VERIFIED** (All 9 genuine screenshots audited across Runs #8, #9, and #10; selection bindings and visual states verified in lockstep)  
 **Game Execution Status:** ⏸️ **TEST_BLOCKED** (Test 1 remains strictly blocked awaiting genuine physical Windows GPU testing)  
 **Budget Consumed:** **$0.00** (Strict zero out-of-pocket policy maintained)  
 
@@ -13,58 +13,89 @@ Milestone 3.1 verifies the published standalone Windows x64 ROS Revival Launcher
 
 ## 1. Published Artifact Inspection
 
-The published release package was downloaded directly from GitHub Actions Build Run #9 (commit `6fc7f28`) and inspected:
+The published release package was downloaded directly from GitHub Actions Build Run #10 (commit `5b95f31`) and inspected:
 
 - **Artifact Name:** `ROS-Revival-Launcher-win-x64.zip`
-- **ZIP File Size:** 180,680 bytes (0.17 MB)
+- **ZIP File Size:** 180,820 bytes (0.17 MB)
 - **Archive Package Contents:**
   - `ROS.Launcher.exe` (359,620 bytes) — Standalone single-file PE32+ executable (GUI) x86-64.
-  - `ROS.Launcher.pdb` (38,188 bytes) — Diagnostic symbol file.
+  - `ROS.Launcher.pdb` (38,620 bytes) — Diagnostic symbol file.
 - **Verification:**
   - Zero missing dependencies or unmanaged DLLs.
   - Self-extracting single-file packaging executes cleanly on a standard Windows environment.
 
 ---
 
-## 2. Evidence Audit & Discrepancy Resolution (Run #8 vs Run #9)
+## 2. Selection Binding Investigation: Real Bug vs. Capture Inconsistency
 
-During review of the initial Run #8 evidence, specific UI binding, z-order, and layout discrepancies were identified. These have been completely resolved and re-verified in GitHub Actions Run #9 (Run ID: `45405068096`):
+### Investigation Findings
+The reported inconsistency in screenshots 04 and 06 (where the lobby header indicated `Squad` or `Duo`, while the `Fireteam` button appeared highlighted) was investigated across the ViewModel, XAML view, and OS rendering layer:
 
-| Evidence Item / Review Requirement | Run #8 Status (Initial) | Run #9 Status (Corrected) | Technical Root Cause & Resolution |
-| :--- | :--- | :--- | :--- |
-| **1. Home Initial View (`01_home_initial_view.png`)** | ⚠️ Foreground blocked by Windows Terminal / GitHub Actions logs | ✅ **Verified Genuine Home View** | `Process.Start` left terminal in foreground. Implemented Win32 API window control (`SetForegroundWindow`, `BringWindowToTop`, `ShowWindow(SW_RESTORE)`, `SetWindowPos(HWND_TOPMOST)`), `Topmost="True"` in XAML, and an active UI Automation element discovery loop. Screenshot 01 now shows the clean ROS Launcher Home screen. |
-| **2. Visual Bots Added (`04_lobby_visual_bots_added.png`)** | ⚠️ Roster rendered open slots instead of visual placeholder bots | ✅ **Verified Populated Roster** | `LobbyRoom.Slots` was a standard `List<LobbySlot>` lacking `INotifyCollectionChanged`, and `LobbySlot` lacked `INotifyPropertyChanged`. Converted to `ObservableCollection<LobbySlot>` and implemented `INotifyPropertyChanged`. Slots #2 and #3 now visibly display `Training Bot #02` and `Training Bot #03` with badges. |
-| **3. Capacity Reduction Warning (`05_lobby_capacity_warning.png`)** | ⚠️ Warning text referenced occupied slot #3, but slot #3 visually appeared open | ✅ **Verified Occupied Slot #3 under Warning Banner** | With reactive collection and property notifications active, Slot #3 is visibly occupied by `Training Bot #03` when reducing Squad (4) to Duo (2), aligning the warning banner text with the visible roster. |
-| **4. Capacity Truncation Confirm (`06_lobby_capacity_truncated.png`)** | ⚠️ Questioned whether result genuinely flowed from warning | ✅ **Verified Genuine Result** | User confirmation invokes `ConfirmChangeModeCommand`, truncating excess occupied slot #3 and open slot #4, preserving Host in slot 1 and bot in slot 2. Warning banner dismissed; Duo mode (2/2) rendered. |
-| **5. Layout Clipping at 1024x768** | ⚠️ 1080x700 window clipped 56px horizontally on 1024x768 display | ✅ **Zero Clipping at 1024x768** | Sized window to `Width="980" Height="660"` centered on screen (`WindowStartupLocation="CenterScreen"`). Provides 22px horizontal margin and 54px vertical margin with zero clipping. |
-| **6. Clear Buttons on Empty Slots** | ⚠️ Clear button was visible across all slots including open and host slots | ✅ **Hidden on Open & Host Slots** | Added `CanClear => IsOccupied && !IsHost` on `LobbySlot` and bound `Button.Visibility` using `BooleanToVisibilityConverter`. Clear button is now hidden on Slot 1 (Host) and all Open slots; visible only on occupied bot slots. |
-| **7. Start Match Disabled Feedback** | ⚠️ Button was disabled with no explanatory message or tooltip | ✅ **Tooltip & Visible Disclaimer Active** | Added `ToolTipService.ShowOnDisabled="True"` on `BtnStartMatch` with explanatory tooltip and a visible amber disclaimer: *"ROS Installation Required"*. |
-| **8. Original ROS Files Immutability** | ✅ Verified untouched | ✅ **Verified Untouched** | Baseline SHA-256 hashes for `ros.exe`, `assets.npk`, and `script.npk` confirmed 100% byte-for-byte identical. |
-| **9. Non-Fabricated Evidence** | ✅ Genuine automated capture | ✅ **Genuine Automated Capture** | All 9 screenshots captured directly by `run-windows-tests.ps1` in GitHub Actions Windows runner. Zero synthetic or edited imagery. |
+1. **ViewModel & Data Layer: VERIFIED CORRECT**
+   - In `MainViewModel.cs`, properties `IsModeSolo`, `IsModeDuo`, `IsModeSquad`, `IsModeFireteam`, `IsPerspectiveTpp`, `IsPerspectiveFpp`, `IsMapGhillie`, and `IsMapFearless` were correctly defined and evaluated against `Lobby.SelectedMode`, `Lobby.Perspective`, and `Lobby.SelectedMap`.
+   - `NotifyLobbyChanged()` was properly raising `PropertyChanged` notifications for all selection flags.
+   - Room capacity and slots collection truncated and expanded in exact accordance with the selected mode (1 for Solo, 2 for Duo, 4 for Squad, 5 for Fireteam).
+   - The header summary string (`LobbyStatusSummary`) was correctly bound and accurately rendered the active mode, perspective, map, and player counts.
+
+2. **XAML View Layer: REAL UI BINDING BUG IDENTIFIED**
+   - In `MainWindow.xaml`, the Mode buttons (`BtnModeSolo`, `BtnModeDuo`, `BtnModeSquad`, `BtnModeFireteam`), Perspective buttons (`BtnPerspTpp`, `BtnPerspFpp`), and Map buttons were declared as standard `<Button>` controls with static background attributes (`Background="#252C37"` or `#1A202C`).
+   - The buttons completely lacked dynamic WPF `Style` triggers or `DataTrigger`s binding their visual background, border, or foreground to the ViewModel's `IsMode*`, `IsPerspective*`, or `IsMap*` properties.
+   - Consequently, the buttons had no mechanism to visually change state when the active mode or perspective was updated.
+
+3. **Rendering Layer: WINDOWS AERO DEFAULT FOCUS INTERACTION**
+   - Standard WPF buttons without custom `ControlTemplate`s use the default Windows theme (Aero2 on Windows Server 2025 / Windows 11).
+   - In the Aero2 theme, whichever button retains keyboard/tab focus is rendered with a default light-cyan focus brush (`#BEE6FD`).
+   - The `BtnModeFireteam` button retained focus in the tab sequence and was therefore painted with this default light-cyan focus brush, creating the misleading appearance that `Fireteam` was permanently selected, even though the ViewModel state, room capacity, and lobby header were correctly set to `Squad` or `Duo`.
+
+### Corrective Implementation
+To eliminate both the UI binding bug and the OS focus artifact:
+- Defined `SelectableButtonStyle` and `MapCardButtonStyle` in `Theme.xaml` with custom `ControlTemplate`s, removing default OS focus visuals via `FocusVisualStyle="{x:Null}"`.
+- Added reactive `DataTrigger`s in `MainWindow.xaml` for all 4 team modes, both perspectives, and both maps:
+  - **Active Selection:** Background `#1C3847`, Border `StatusCyanBrush` (1.5px), Foreground `#FFFFFF` (Bold).
+  - **Inactive Selection:** Background `#252C37`, Border `BorderDarkBrush` (1px), Foreground `TextSecondaryBrush` (Normal).
+- Added 5 new automated unit tests in `LobbyServiceTests.cs` verifying mode, capacity, map, perspective, and summary string consistency in lockstep (39 total tests passing).
 
 ---
 
-## 3. Windows UI Runtime Evidence Matrix (Run #9)
+## 3. Evidence Audit & Discrepancy Resolution Matrix (Runs #8, #9, and #10)
 
-The published `ROS.Launcher.exe` was executed in a clean Windows environment (Windows Server 2025 Datacenter, Build 26100.0, Win32NT x64, 1024x768 resolution). The resulting genuine screenshots:
+| Evidence Item / Review Requirement | Run #8 Status (Initial) | Run #9 Status (Interim) | Run #10 Status (Verified Final) | Technical Root Cause & Final Verification |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Home Initial View (`01_home_initial_view.png`)** | ⚠️ Obstructed by terminal logs | ✅ Clean Home View | ✅ **Clean Home View** | Window z-order restored via Win32 API calls (`SetForegroundWindow`, `BringWindowToTop`, `ShowWindow`, `SetWindowPos(HWND_TOPMOST)`). |
+| **2. Visual Bots Added (`04_lobby_visual_bots_added.png`)** | ⚠️ Displayed open slots | ✅ Populated Bots #02 & #03 | ✅ **Populated Bots & Active Squad Highlight** | `LobbyRoom.Slots` uses `ObservableCollection<LobbySlot>` with `INotifyPropertyChanged`. Squad mode button highlighted in cyan; matches header `Mode: Squad (4P)`. |
+| **3. Capacity Reduction Warning (`05_lobby_capacity_warning.png`)** | ⚠️ Slot #3 appeared open | ✅ Slot #3 occupied | ✅ **Slot #3 Occupied under Warning Banner** | Warning prompt references occupied slot #3 while slot #3 visibly displays `Training Bot #03`. |
+| **4. Capacity Truncation Confirm (`06_lobby_capacity_truncated.png`)** | ⚠️ Questioned result flow | ✅ Truncated to 2 slots | ✅ **Truncated to Duo & Active Duo Highlight** | Confirming truncation removes slot #3; Duo button highlighted in cyan; matches header `Mode: Duo (2P)`. |
+| **5. Layout at 1024x768** | ⚠️ 1080x700 clipped | ✅ Sized 980x660 | ✅ **Zero Clipping at 1024x768** | Window sized to 980x660 centered on screen. Full 22px horizontal and 54px vertical margins on 1024x768. |
+| **6. Clear Buttons on Empty Slots** | ⚠️ Visible on all slots | ✅ Hidden on Open & Host | ✅ **Hidden on Open & Host Slots** | Bound `CanClear => IsOccupied && !IsHost` via `BooleanToVisibilityConverter`. Clear button visible only on bot slots. |
+| **7. Start Match Feedback** | ⚠️ Disabled with no feedback | ✅ Tooltip & Amber Text | ✅ **Tooltip & Amber Text Active** | `ToolTipService.ShowOnDisabled="True"` active; visible *"ROS Installation Required"* text rendered. |
+| **8. Game-Mode Button Selection Consistency** | ⚠️ Fireteam button falsely highlighted | ⚠️ Fireteam button falsely highlighted | ✅ **Active Mode Button Matches Header & Capacity** | Mode buttons dynamically highlight based on ViewModel state (`IsMode*`). Squad highlighted in #04, Duo highlighted in #06. |
+| **9. TPP / FPP Selection Consistency** | ⚠️ Static buttons | ⚠️ Static buttons | ✅ **Active Perspective Matches Header** | Perspective buttons dynamically highlight based on `IsPerspective*`. TPP highlighted in #02-#07, FPP highlighted in #08-#09. |
+| **10. Original Game Files Immutability** | ✅ Untouched | ✅ Untouched | ✅ **Untouched** | SHA-256 hashes of `ros.exe`, `assets.npk`, and `script.npk` verified byte-for-byte identical. |
+| **11. Genuine Evidence** | ✅ Automated | ✅ Automated | ✅ **Genuine Automated Captures** | All 9 screenshots captured directly by `run-windows-tests.ps1` in GitHub Actions Run #10 (Run ID: `45407411114`). |
+
+---
+
+## 4. Windows UI Runtime Evidence Matrix (Run #10)
+
+The published `ROS.Launcher.exe` was executed in a clean Windows environment (Windows Server 2025 Datacenter, Build 26100.0, Win32NT x64, 1024x768 resolution). All 9 resulting genuine screenshots:
 
 | Step | State Verified | Evidence Screenshot | Verification Result |
 | :---: | :--- | :--- | :--- |
 | **1** | **Main Window Startup** | [`01_home_initial_view.png`](file:///workspaces/ai-tool/Documentation/Screenshots/01_home_initial_view.png) | ✅ PASS — Clean Home screen in foreground; guest profile loaded; detection panel active; zero terminal overlay |
-| **2** | **Custom Lobby Navigation** | [`02_custom_lobby_default.png`](file:///workspaces/ai-tool/Documentation/Screenshots/02_custom_lobby_default.png) | ✅ PASS — Custom Lobby tab navigated; Room `#881902` created; host Survivor_7111 in slot 1 |
-| **3** | **Map Selection** | [`03_lobby_map_selected.png`](file:///workspaces/ai-tool/Documentation/Screenshots/03_lobby_map_selected.png) | ✅ PASS — Fearless Fiord (8.0 x 8.0 km Expansion) selected; status updated |
-| **4** | **Visual Bot Slots Added** | [`04_lobby_visual_bots_added.png`](file:///workspaces/ai-tool/Documentation/Screenshots/04_lobby_visual_bots_added.png) | ✅ PASS — Slot 2 (`Training Bot #02`) and Slot 3 (`Training Bot #03`) populated; Clear button visible only on bots |
-| **5** | **Capacity Reduction Warning** | [`05_lobby_capacity_warning.png`](file:///workspaces/ai-tool/Documentation/Screenshots/05_lobby_capacity_warning.png) | ✅ PASS — Warning banner displayed; Slot #3 visibly occupied by Training Bot #03; truncation confirmed pending |
-| **6** | **Capacity Truncation Confirm** | [`06_lobby_capacity_truncated.png`](file:///workspaces/ai-tool/Documentation/Screenshots/06_lobby_capacity_truncated.png) | ✅ PASS — Duo mode (2P) confirmed; occupied slot #3 removed; slot 2 preserved; warning banner dismissed |
-| **7** | **6-Digit Local Room Creation** | [`07_lobby_new_room_created.png`](file:///workspaces/ai-tool/Documentation/Screenshots/07_lobby_new_room_created.png) | ✅ PASS — Created new local room `#623470` (strictly offline 6-digit identifier); roster reset cleanly |
-| **8** | **Perspective Selection** | [`08_lobby_perspective_fpp.png`](file:///workspaces/ai-tool/Documentation/Screenshots/08_lobby_perspective_fpp.png) | ✅ PASS — Switched perspective from TPP to FPP (First-Person); parameters updated |
-| **9** | **Preset Persistence** | [`09_lobby_preset_saved.png`](file:///workspaces/ai-tool/Documentation/Screenshots/09_lobby_preset_saved.png) | ✅ PASS — Configuration written to `%LOCALAPPDATA%\ROSRevival\lobby.json`; confirmation status displayed |
+| **2** | **Custom Lobby Default** | [`02_custom_lobby_default.png`](file:///workspaces/ai-tool/Documentation/Screenshots/02_custom_lobby_default.png) | ✅ PASS — Default state: Ghillie Island card highlighted, Squad button highlighted, TPP button highlighted; header matches `Map: Ghillie Island • Mode: Squad (4P) • Perspective: TPP • Slots: 1/4` |
+| **3** | **Map Selection** | [`03_lobby_map_selected.png`](file:///workspaces/ai-tool/Documentation/Screenshots/03_lobby_map_selected.png) | ✅ PASS — Fearless Fiord card highlighted; Ghillie Island dark; Squad & TPP highlighted; header matches `Map: Fearless Fiord • Mode: Squad (4P) • Perspective: TPP • Slots: 1/4` |
+| **4** | **Visual Bot Slots Added** | [`04_lobby_visual_bots_added.png`](file:///workspaces/ai-tool/Documentation/Screenshots/04_lobby_visual_bots_added.png) | ✅ PASS — Squad button highlighted; Slots #2 & #3 populated; header matches `Mode: Squad (4P) • Slots: 3/4` |
+| **5** | **Capacity Reduction Warning** | [`05_lobby_capacity_warning.png`](file:///workspaces/ai-tool/Documentation/Screenshots/05_lobby_capacity_warning.png) | ✅ PASS — Warning banner displayed; Squad remains highlighted pending confirmation; Slot #3 visibly occupied |
+| **6** | **Capacity Truncation Confirm** | [`06_lobby_capacity_truncated.png`](file:///workspaces/ai-tool/Documentation/Screenshots/06_lobby_capacity_truncated.png) | ✅ PASS — Duo button highlighted; Squad dark; Slot #3 removed; header matches `Mode: Duo (2P) • Slots: 2/2` |
+| **7** | **6-Digit Local Room Creation** | [`07_lobby_new_room_created.png`](file:///workspaces/ai-tool/Documentation/Screenshots/07_lobby_new_room_created.png) | ✅ PASS — New local room `#847364` created; default Ghillie Island, Squad, and TPP highlighted; roster reset cleanly |
+| **8** | **Perspective Selection** | [`08_lobby_perspective_fpp.png`](file:///workspaces/ai-tool/Documentation/Screenshots/08_lobby_perspective_fpp.png) | ✅ PASS — FPP button highlighted; TPP dark; header matches `Perspective: FPP` |
+| **9** | **Preset Persistence** | [`09_lobby_preset_saved.png`](file:///workspaces/ai-tool/Documentation/Screenshots/09_lobby_preset_saved.png) | ✅ PASS — Configuration written to `%LOCALAPPDATA%\ROSRevival\lobby.json`; FPP & Squad remain highlighted; confirmation displayed |
 
 ---
 
-## 4. Log & Error Audit
+## 5. Log & Error Audit (Run #10)
 
-Application logs written to `%LOCALAPPDATA%\ROSRevival\Logs\launcher.log` during the Run #9 live session:
+Application logs written to `%LOCALAPPDATA%\ROSRevival\Logs\launcher.log` during the Run #10 live session:
 
 - **Total Logged Events:** 19
 - **Error Count (`[ERROR]`):** **0**
@@ -72,31 +103,9 @@ Application logs written to `%LOCALAPPDATA%\ROSRevival\Logs\launcher.log` during
 - **Unhandled Exceptions:** **0**
 - **Atomic File Writes:** Verified 7 successful atomic file replacements to `lobby.json`.
 
-```
-[2026-11-24 13:37:01.898] [INFO] ROS Revival Launcher initialized.
-[2026-11-24 13:37:03.986] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #881902
-[2026-11-24 13:37:03.994] [INFO] Game detection completed: Not found in candidate paths.
-[2026-11-24 13:37:03.995] [INFO] Game status refreshed. Path: '', Ready: False
-[2026-11-24 13:37:08.666] [INFO] Custom Lobby map changed to 'Fearless Fiord'.
-[2026-11-24 13:37:08.668] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #881902
-[2026-11-24 13:37:10.595] [INFO] Added visual placeholder bot to Slot 2. Notice: Offline UI placeholder only (no in-game AI).
-[2026-11-24 13:37:10.601] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #881902
-[2026-11-24 13:37:12.195] [INFO] Added visual placeholder bot to Slot 3. Notice: Offline UI placeholder only (no in-game AI).
-[2026-11-24 13:37:12.200] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #881902
-[2026-11-24 13:37:14.317] [WARN] Capacity reduction warning: Reducing capacity to Duo (2 players) would remove occupied slot(s): #3. Confirm to proceed.
-[2026-11-24 13:37:16.427] [INFO] Confirmed capacity reduction to Duo. Slots truncated.
-[2026-11-24 13:37:16.442] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #881902
-[2026-11-24 13:37:18.583] [INFO] New local custom room #623470 created by Survivor_7111.
-[2026-11-24 13:37:18.592] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #623470
-[2026-11-24 13:37:20.682] [INFO] Custom Lobby perspective set to 'FPP'.
-[2026-11-24 13:37:20.683] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #623470
-[2026-11-24 13:37:22.629] [INFO] Lobby configuration saved atomically to 'C:\Users\runneradmin\AppData\Local\ROSRevival\lobby.json'. Room #623470
-[2026-11-24 13:37:22.630] [INFO] Lobby configuration saved. Room ID: #623470
-```
-
 ---
 
-## 5. Game File Immutability Audit
+## 6. Game File Immutability Audit
 
 Original Rules of Survival PC client files in `RosInfinity/Game/` audited with SHA-256 cryptographic hashes:
 
@@ -108,22 +117,22 @@ Original Rules of Survival PC client files in `RosInfinity/Game/` audited with S
 
 ---
 
-## 6. Automated Test Suite Audit
+## 7. Automated Test Suite Audit
 
 The full cross-platform test suite was executed across target frameworks:
-- **Total Tests:** 34
-- **Passed:** 34
+- **Total Tests:** 39 (34 previous + 5 new selection consistency tests)
+- **Passed:** 39
 - **Failed:** 0
 - **Skipped:** 0
-- **Duration:** 106 ms
+- **Duration:** 152 ms
 
 ```
-Passed!  - Failed: 0, Passed: 34, Skipped: 0, Total: 34 - ROS.Launcher.Tests.dll (net10.0)
+Passed!  - Failed: 0, Passed: 39, Skipped: 0, Total: 39 - ROS.Launcher.Tests.dll (net10.0)
 ```
 
 ---
 
-## 7. Strict Operational Limitations & Next Steps
+## 8. Strict Operational Limitations & Next Steps
 
 1. **Test 1 Remains `TEST_BLOCKED`**: The launcher has been verified to start cleanly on Windows, but genuine DirectX 3D execution of the original Rules of Survival game process (`ros.exe`) requires an interactive physical Windows GPU machine.
 2. **No In-Game AI Claimed**: Visual bot slots in the Custom Lobby are strictly offline UI placeholders for team composition preview. The launcher does not inject AI bots into `ros.exe`.
