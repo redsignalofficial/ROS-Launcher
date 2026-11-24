@@ -134,4 +134,49 @@ public class IntegrationTests : IDisposable
         Assert.False(launched);
         Assert.Contains("Missing files", error);
     }
+
+    [Fact]
+    public async Task Test_CustomLobby_FullLifecycle_And_StartMatchValidation()
+    {
+        var logger = new LauncherLogService(_configDir);
+        var lobbyService = new LocalLobbyService(logger, _configDir);
+        var launchService = new GameLaunchService(logger);
+
+        // 1. Initialize Custom Lobby
+        var lobby = await lobbyService.LoadOrCreateLobbyAsync("CompetitivePlayer");
+        Assert.NotNull(lobby);
+        Assert.Equal(6, lobby.RoomId.Length);
+        Assert.Equal("CompetitivePlayer", lobby.Slots[0].PlayerName);
+
+        // 2. Configure match parameters
+        lobby.SelectedMap = "Fearless Fiord";
+        var modeResult = lobbyService.ChangeMode(lobby, "Squad");
+        Assert.Equal(CapacityChangeStatus.Success, modeResult.Status);
+
+        // 3. Add visual placeholder bot
+        bool botAdded = lobbyService.AddBotSlot(lobby, out string botMsg);
+        Assert.True(botAdded);
+        Assert.True(lobby.Slots[1].IsBot);
+
+        // 4. Save lobby configuration
+        await lobbyService.SaveLobbyAsync(lobby);
+        Assert.True(File.Exists(lobbyService.GetLobbyFilePath()));
+
+        // 5. Verify Start Match prerequisites: game not ready must block start
+        var unreadyInstall = new GameInstallation
+        {
+            IsDetected = false,
+            ExecutablePath = ""
+        };
+        var settings = new LauncherSettings();
+
+        bool matchStarted = launchService.LaunchGame(unreadyInstall, settings, out string launchError);
+        Assert.False(matchStarted);
+        Assert.Contains("Game client is not ready", launchError);
+
+        // 6. Test capacity reduction warning protection
+        var warnResult = lobbyService.ChangeMode(lobby, "Solo", confirmTruncate: false);
+        Assert.Equal(CapacityChangeStatus.WarningOccupiedSlotsWouldBeRemoved, warnResult.Status);
+        Assert.Equal(4, lobby.Slots.Count); // Preserved!
+    }
 }

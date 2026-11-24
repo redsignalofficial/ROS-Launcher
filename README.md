@@ -13,7 +13,24 @@ ROS REVIVAL is a community-driven initiative dedicated to preserving the authent
 3. **Independent Technology**: A native C# WPF launcher built from scratch with zero dependencies on NetEase or private third-party infrastructure.
 4. **100% Offline Guest Mode**: No mandatory online account or registration required to launch.
 5. **No Binary Tampering**: We do not modify original game binaries (`ros.exe`), reverse engineer anti-cheat mechanisms, or bypass encryption.
-6. **Cloud CI/CD**: Cloud-compiled Windows binaries via GitHub Actions for full management on mobile or desktop without requiring a local development PC.
+6. **Zero-Budget Guarantee**: Strict $0.00 cloud spending policy. Testing utilizes GitHub Actions and volunteer community hardware.
+7. **Cloud CI/CD**: Cloud-compiled Windows binaries via GitHub Actions for full management on mobile or desktop without requiring a local development PC.
+
+---
+
+## Launcher Features
+
+- **Guest Profile**: Offline local identity with customizable nicknames and local level tracking.
+- **Game Detection & Integrity**: Automatically locates `ros.exe` and validates essential game assets (`assets.npk`, `script.npk`, `setting.ini`).
+- **Custom Lobby (Milestone 3)**:
+  - Unique 6-digit local room codes (offline session management).
+  - Map selection (Ghillie Island, Fearless Fiord).
+  - Mode selection (Solo, Duo, Squad, Fireteam) with capacity reduction warning protection.
+  - Team roster with visual placeholder bot slots.
+  - Safe JSON persistence with atomic file writes and automatic corrupted JSON recovery.
+  - Clean "Start Match" execution without unofficial command-line parameters.
+- **Diagnostic Logging**: Automated activity logs saved to `%LOCALAPPDATA%\ROSRevival\Logs\launcher.log`.
+- **Comprehensive Automated Tests**: 34 unit and integration tests verifying configurations, detection, launch, and lobby persistence.
 
 ---
 
@@ -23,7 +40,8 @@ ROS REVIVAL is a community-driven initiative dedicated to preserving the authent
 ROS-REVIVAL/
 ├── .github/
 │   └── workflows/
-│       └── windows-build.yml       # Automated cloud build & ZIP artifact pipeline
+│       ├── windows-build.yml       # Cloud build & ZIP artifact pipeline
+│       └── ros-real-launch-test.yml # Real-game DirectX execution test pipeline
 ├── Launcher/
 │   └── ROS.Launcher/              # Native C# WPF Desktop Launcher
 │       ├── Configuration/
@@ -33,12 +51,15 @@ ROS-REVIVAL/
 │       ├── Views/
 │       └── Resources/
 ├── Tests/
-│   └── ROS.Launcher.Tests/        # Cross-platform unit tests
+│   └── ROS.Launcher.Tests/        # Cross-platform unit & integration tests
 ├── Documentation/
 │   ├── Architecture.md
 │   ├── Roadmap.md
 │   ├── Build-Instructions.md
-│   └── Compatibility.md
+│   ├── Compatibility.md
+│   ├── Cloud-Windows-GPU-Testing-Plan.md
+│   ├── ROS-Real-Launch-Test-Report.md
+│   └── Volunteer-Runner-Security-Guide.md
 ├── .gitignore
 ├── global.json
 ├── README.md

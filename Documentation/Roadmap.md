@@ -22,16 +22,23 @@
 - [x] Dedicated Settings tab allowing manual path input and directory browsing.
 - [x] Automated unit and integration test suite expanded to 18 passing tests.
 
-### Milestone 3: Custom Lobby Interface (Pending Review)
-- [ ] Launcher-side custom room creation interface.
-- [ ] Map selection: Ghillie Island and Fearless Fiord.
-- [ ] Mode selection: Solo, Duo, Squad, Fireteam.
-- [ ] Player count and room host controls.
+### Milestone 3: Custom Lobby Interface (Completed)
+- [x] Launcher-side custom room creation interface with unique 6-digit local room IDs.
+- [x] Map selection cards: Ghillie Island (6.4km) and Fearless Fiord (8.0km).
+- [x] Team mode selection: Solo (1P), Duo (2P), Squad (4P), Fireteam (5P).
+- [x] Perspective toggle: TPP (Third-Person) and FPP (First-Person).
+- [x] Team roster view with host controls, slot roles, and notes.
+- [x] Visual placeholder bot slots (+Add Bot, Clear Slot) clearly documented as offline UI placeholders.
+- [x] Capacity reduction protection: prevents silent data loss with user warnings and confirmation.
+- [x] Safe JSON persistence: atomic file writes and automatic recovery from corrupted/malformed JSON.
+- [x] Clean Start Match workflow: launches genuine `ros.exe` without invalid CLI switches, explaining that official servers are offline.
+- [x] Comprehensive test suite expanded to 34 passing automated unit and integration tests.
+- [x] Volunteer Runner Security Guide created (`Documentation/Volunteer-Runner-Security-Guide.md`).
 
 ### Milestone 4: Game Integration Assessment & Compatibility (Pending Review)
 - [ ] In-depth process diagnostics and exit code telemetry.
-- [ ] Comprehensive file hash manifest verification.
-- [ ] Real-play execution on authorized cloud/self-hosted Windows GPU test environment.
+- [ ] Real-play execution on authorized volunteer Windows GPU test environment.
+- [ ] Test 1 verification on physical DirectX 3D hardware (currently `TEST_BLOCKED`).
 
 ### Milestone 5: Future Independent Backend (Deferred)
 - [ ] Independent player account API.
