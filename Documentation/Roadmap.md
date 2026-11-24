@@ -34,13 +34,23 @@
 - [x] Clean Start Match workflow: launches genuine `ros.exe` without invalid CLI switches, explaining that official servers are offline.
 - [x] Comprehensive test suite expanded to 34 passing automated unit and integration tests.
 - [x] Volunteer Runner Security Guide created (`Documentation/Volunteer-Runner-Security-Guide.md`).
+- [x] Milestone 3.1: Release verification & Windows UI runtime testing with 9 genuine evidence screenshots.
 
-### Milestone 4: Game Integration Assessment & Compatibility (Pending Review)
-- [ ] In-depth process diagnostics and exit code telemetry.
-- [ ] Real-play execution on authorized volunteer Windows GPU test environment.
+### Milestone 4: Backend Feasibility & Architecture Planning (Planning Complete, Pending Review)
+- [x] Independent backend architecture design (`Documentation/Milestone-4-Backend-Architecture.md`).
+- [x] REST & WebSocket / SignalR API specification (`Documentation/Backend-API-Specification.md`).
+- [x] Technical compatibility & feasibility assessment (`Documentation/Backend-Feasibility-Assessment.md`).
+- [x] Local mock backend design proposal (`Documentation/Proposed-Local-Mock-Backend-Design.md`).
+- [x] Zero-cost hosting evaluation ($0.00 budget, local loopback, Oracle Cloud Free Tier).
+- [x] Preservation guardrails enforced (zero binary tampering, zero anti-cheat cracking, zero leaked code).
+- [x] Test 1 status preserved as strictly `TEST_BLOCKED`.
+
+### Milestone 5: Local Mock Backend Implementation (Pending Review)
+- [ ] Build `ROS.Revival.MockBackend` standalone service.
+- [ ] Implement in-memory room management and SignalR lobby hub.
+- [ ] Automated integration tests using `WebApplicationFactory`.
+- [ ] Launcher client integration options.
+
+### Milestone 6: Game Client Integration & Protocol Exploration (Deferred)
+- [ ] Controlled network telemetry observation on authorized Windows GPU environment.
 - [ ] Test 1 verification on physical DirectX 3D hardware (currently `TEST_BLOCKED`).
-
-### Milestone 5: Future Independent Backend (Deferred)
-- [ ] Independent player account API.
-- [ ] Independent lobby matchmaking server.
-- [ ] Dedicated game server prototype (subject to technical feasibility).
