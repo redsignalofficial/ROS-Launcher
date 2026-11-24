@@ -1,0 +1,94 @@
+name: Windows Launcher Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-package:
+    name: Build & Package Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Validate Environment & SDK
+        run: |
+          dotnet --version
+          dotnet --list-sdks
+          dotnet --list-runtimes
+
+      - name: Restore NuGet Packages
+        run: dotnet restore ROS-Revival.sln
+
+      - name: Run Unit Tests
+        run: dotnet test Tests/ROS.Launcher.Tests/ROS.Launcher.Tests.csproj --configuration Release --verbosity normal
+
+      - name: Publish Windows x64 Launcher
+        run: |
+          dotnet publish Launcher/ROS.Launcher/ROS.Launcher.csproj `
+            --configuration Release `
+            --framework net8.0-windows `
+            --runtime win-x64 `
+            --self-contained false `
+            -p:PublishSingleFile=true `
+            -p:IncludeNativeLibrariesForSelfExtract=true `
+            --output ./artifacts/publish
+
+      - name: Verify Published Files
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path ./artifacts/publish
+          if (-not (Test-Path "./artifacts/publish/ROS.Launcher.exe")) {
+            Write-Error "ROS.Launcher.exe was not generated in output directory."
+            exit 1
+          }
+
+      - name: Package Launcher Archive
+        shell: pwsh
+        run: |
+          $artifactName = "ROS-Revival-Launcher-win-x64.zip"
+          Compress-Archive -Path ./artifacts/publish/* -DestinationPath "./$artifactName" -Force
+          $sizeMb = [math]::Round(((Get-Item "./$artifactName").Length / 1MB), 2)
+          Write-Host "Packaged $artifactName ($sizeMb MB)"
+
+      - name: Upload Launcher ZIP Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-Revival-Launcher-win-x64
+          path: ROS-Revival-Launcher-win-x64.zip
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Generate Build Summary
+        shell: pwsh
+        run: |
+          $zipPath = "./ROS-Revival-Launcher-win-x64.zip"
+          $zipSize = if (Test-Path $zipPath) { [math]::Round(((Get-Item $zipPath).Length / 1MB), 2) } else { 0 }
+          
+          "## 🚀 ROS Revival Launcher Build Summary" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "| Metric | Details |" >> $env:GITHUB_STEP_SUMMARY
+          "| :--- | :--- |" >> $env:GITHUB_STEP_SUMMARY
+          "| **Status** | ✅ Build & Tests Successful |" >> $env:GITHUB_STEP_SUMMARY
+          "| **Target Platform** | Windows x64 (`win-x64`) |" >> $env:GITHUB_STEP_SUMMARY
+          "| **Framework** | .NET 8.0-windows / .NET 10 |" >> $env:GITHUB_STEP_SUMMARY
+          "| **Package** | `ROS-Revival-Launcher-win-x64.zip` (${zipSize} MB) |" >> $env:GITHUB_STEP_SUMMARY
+          "| **Commit** | `${{ github.sha }}` |" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "> [!TIP]" >> $env:GITHUB_STEP_SUMMARY
+          "> You can download the compiled launcher ZIP directly from the **Artifacts** section below." >> $env:GITHUB_STEP_SUMMARY

@@ -1,0 +1,44 @@
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build Results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa]rms/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.ide/
+
+# Package & Archive files
+*.zip
+*.tar.gz
+*.7z
+RosInfinity-client-1.9.0.zip
+
+# Proprietary Game Files & Backups (Strict Preservation - Never commit game assets or backups)
+RosInfinity/
+Backups/
+Game/
+
+# .NET / Rider
+.dotnet/
+project.lock.json
+*.nuget.props
+*.nuget.targets
