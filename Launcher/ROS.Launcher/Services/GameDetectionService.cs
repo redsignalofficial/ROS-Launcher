@@ -5,16 +5,27 @@ namespace ROS.Launcher.Services;
 
 public class GameDetectionService : IGameDetectionService
 {
-    private static readonly string[] RequiredGameFiles =
+    private readonly ILauncherLogService? _logger;
+
+    public static readonly string[] RequiredGameFiles =
     {
         "ros.exe",
         "assets.npk",
-        "script.npk"
+        "script.npk",
+        "setting.ini"
     };
+
+    public GameDetectionService(ILauncherLogService? logger = null)
+    {
+        _logger = logger;
+    }
 
     public GameInstallation DetectInstallation(string? candidateDirectory = null)
     {
-        var result = new GameInstallation();
+        var result = new GameInstallation
+        {
+            LastChecked = DateTime.UtcNow
+        };
 
         var searchPaths = new List<string>();
 
@@ -22,6 +33,7 @@ public class GameDetectionService : IGameDetectionService
         {
             searchPaths.Add(candidateDirectory);
             searchPaths.Add(Path.Combine(candidateDirectory, "Game"));
+            searchPaths.Add(Path.Combine(candidateDirectory, "RosInfinity", "Game"));
         }
 
         string baseDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -45,17 +57,21 @@ public class GameDetectionService : IGameDetectionService
                     result.GameDirectory = Path.GetFullPath(path);
                     result.ExecutablePath = Path.GetFullPath(exePath);
 
-                    // Check missing core files
+                    // Validate each required game file
                     foreach (string reqFile in RequiredGameFiles)
                     {
                         string checkPath = Path.Combine(result.GameDirectory, reqFile);
-                        if (!File.Exists(checkPath))
+                        if (File.Exists(checkPath))
+                        {
+                            result.ValidatedFiles.Add(reqFile);
+                        }
+                        else
                         {
                             result.MissingFiles.Add(reqFile);
                         }
                     }
 
-                    // Try detecting version from version.dat or file info
+                    // Try detecting version from version.dat
                     string versionFile = Path.Combine(result.GameDirectory, "version.dat");
                     if (File.Exists(versionFile))
                     {
@@ -65,7 +81,7 @@ public class GameDetectionService : IGameDetectionService
                         }
                         catch
                         {
-                            result.ClientVersion = "1.9.0 (Verified)";
+                            result.ClientVersion = "1.9.0";
                         }
                     }
                     else
@@ -73,15 +89,17 @@ public class GameDetectionService : IGameDetectionService
                         result.ClientVersion = "1.9.0 (PC)";
                     }
 
+                    _logger?.LogInfo($"Game detected at '{result.GameDirectory}' (Ready: {result.IsReadyToPlay}, Missing: {result.MissingFiles.Count})");
                     return result;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Directory access error, continue search
+                _logger?.LogWarning($"Error inspecting candidate path '{path}': {ex.Message}");
             }
         }
 
+        _logger?.LogInfo($"Game detection completed: Not found in candidate paths.");
         return result;
     }
 }

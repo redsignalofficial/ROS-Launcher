@@ -3,18 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:ROS.Launcher.ViewModels"
         Title="ROS Revival Launcher"
-        Height="680" Width="1050"
-        MinHeight="600" MinWidth="900"
+        Height="700" Width="1080"
+        MinHeight="640" MinWidth="940"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
-    <!-- Outer Window Border & Drop Shadow -->
+    <!-- Outer Window Border & Styling -->
     <Border Background="{StaticResource BgDarkBrush}"
             BorderBrush="{StaticResource BorderDarkBrush}"
             BorderThickness="1"
@@ -26,7 +30,7 @@
                 <RowDefinition Height="36" /> <!-- Footer Status Bar -->
             </Grid.RowDefinitions>
 
-            <!-- 1. Header / Window Chrome -->
+            <!-- 1. Header / Custom Chrome -->
             <Border Grid.Row="0"
                     Background="{StaticResource BgPanelBrush}"
                     BorderBrush="{StaticResource BorderDarkBrush}"
@@ -147,8 +151,9 @@
                               VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="28">
-                        <!-- HOME VIEW -->
-                        <StackPanel Visibility="{Binding ActiveTab, Converter={x:Null}}">
+
+                        <!-- TAB 1: HOME VIEW -->
+                        <StackPanel Visibility="{Binding IsHomeActive, Converter={StaticResource BoolToVis}}">
                             <!-- Hero Banner Card -->
                             <Border Background="{StaticResource BgCardBrush}"
                                     BorderBrush="{StaticResource BorderDarkBrush}"
@@ -176,7 +181,7 @@
                                                    Foreground="{StaticResource TextSecondaryBrush}"
                                                    FontSize="12"
                                                    TextWrapping="Wrap"
-                                                   MaxWidth="500" />
+                                                   MaxWidth="480" />
                                     </StackPanel>
 
                                     <!-- Launch Button -->
@@ -194,7 +199,7 @@
                                 </Grid>
                             </Border>
 
-                            <!-- Two Columns: Guest Profile & Game Installation Status -->
+                            <!-- Two Columns: Guest Profile & Game Integrity -->
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -262,7 +267,7 @@
                                     </StackPanel>
                                 </Border>
 
-                                <!-- Column 2: Game Installation Status -->
+                                <!-- Column 2: Game Installation & Integrity -->
                                 <Border Grid.Column="2"
                                         Background="{StaticResource BgCardBrush}"
                                         BorderBrush="{StaticResource BorderDarkBrush}"
@@ -270,30 +275,39 @@
                                         CornerRadius="6"
                                         Padding="18">
                                     <StackPanel>
-                                        <Grid Margin="0,0,0,12">
+                                        <Grid Margin="0,0,0,10">
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Text="GAME INTEGRITY"
+                                            <TextBlock Text="GAME INTEGRITY &amp; DETECTION"
                                                        Foreground="{StaticResource AccentGoldBrush}"
                                                        FontWeight="Bold"
                                                        FontSize="13" />
-                                            <Button Grid.Column="1"
-                                                    Content="Refresh"
-                                                    Command="{Binding RefreshGameStatusCommand}"
-                                                    Background="Transparent"
-                                                    Foreground="{StaticResource TextSecondaryBrush}"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    FontSize="11" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <Button Content="Browse..."
+                                                        Command="{Binding BrowseGameDirectoryCommand}"
+                                                        Background="Transparent"
+                                                        Foreground="{StaticResource StatusCyanBrush}"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="11"
+                                                        Margin="0,0,8,0" />
+                                                <Button Content="Refresh"
+                                                        Command="{Binding RefreshGameStatusCommand}"
+                                                        Background="Transparent"
+                                                        Foreground="{StaticResource TextSecondaryBrush}"
+                                                        BorderThickness="0"
+                                                        Cursor="Hand"
+                                                        FontSize="11" />
+                                            </StackPanel>
                                         </Grid>
 
                                         <TextBlock Text="{Binding GameStatusSummary}"
                                                    Foreground="{StaticResource TextPrimaryBrush}"
                                                    FontWeight="SemiBold"
                                                    FontSize="12"
-                                                   Margin="0,0,0,8" />
+                                                   Margin="0,0,0,6" />
 
                                         <TextBlock Text="Directory:"
                                                    Foreground="{StaticResource TextMutedBrush}"
@@ -302,33 +316,241 @@
                                                    Foreground="{StaticResource TextSecondaryBrush}"
                                                    FontSize="11"
                                                    TextTrimming="CharacterEllipsis"
-                                                   Margin="0,2,0,8" />
+                                                   Margin="0,2,0,6" />
 
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="Client Executable: "
+                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                            <TextBlock Text="Executable: "
                                                        Foreground="{StaticResource TextMutedBrush}"
                                                        FontSize="11" />
                                             <TextBlock Text="ros.exe"
                                                        Foreground="{StaticResource AccentGoldBrush}"
                                                        FontWeight="SemiBold"
                                                        FontSize="11" />
+                                            <TextBlock Text="{Binding LastIntegrityCheckText}"
+                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                       FontSize="10"
+                                                       Margin="12,0,0,0" />
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Files Status: "
+                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                       FontSize="11" />
+                                            <TextBlock Text="{Binding MissingFilesText}"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                       FontSize="11" />
                                         </StackPanel>
                                     </StackPanel>
                                 </Border>
                             </Grid>
 
-                            <!-- Notice Card -->
+                            <!-- Preservation Notice Card -->
                             <Border Background="#141922"
                                     BorderBrush="#252D3B"
                                     BorderThickness="1"
                                     CornerRadius="6"
                                     Padding="14">
-                                <TextBlock Text="Preservation Notice: ROS Revival strictly preserves original game files and does not modify ros.exe, assets.npk, or script.npk. All original Rules of Survival assets remain property of their respective owners."
+                                <TextBlock Text="Preservation Notice: ROS Revival strictly preserves original game files and does not modify ros.exe, assets.npk, or script.npk. All original Rules of Survival assets belong to NetEase."
                                            Foreground="{StaticResource TextMutedBrush}"
                                            FontSize="11"
                                            TextWrapping="Wrap" />
                             </Border>
                         </StackPanel>
+
+                        <!-- TAB 2: CUSTOM LOBBY VIEW -->
+                        <StackPanel Visibility="{Binding IsLobbyActive, Converter={StaticResource BoolToVis}}">
+                            <Border Background="{StaticResource BgCardBrush}"
+                                    BorderBrush="{StaticResource BorderDarkBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="24"
+                                    Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="CUSTOM LOBBY (LAUNCHER-SIDE)"
+                                               Foreground="{StaticResource AccentGoldBrush}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,6" />
+                                    <TextBlock Text="Simulated room setup and match parameter preparation. In-game multiplayer requires dedicated server infrastructure."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="12"
+                                               Margin="0,0,0,16" />
+
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Grid.Column="0"
+                                                Background="{StaticResource BgPanelBrush}"
+                                                BorderBrush="{StaticResource BorderDarkBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="14">
+                                            <StackPanel>
+                                                <TextBlock Text="MATCH PARAMETERS"
+                                                           Foreground="{StaticResource AccentGoldBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="Bold"
+                                                           Margin="0,0,0,8" />
+                                                <TextBlock Text="Mode: SQUAD (4 Players)"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontSize="12"
+                                                           Margin="0,0,0,4" />
+                                                <TextBlock Text="Map: GHILLIE ISLAND"
+                                                           Foreground="{StaticResource TextPrimaryBrush}"
+                                                           FontSize="12"
+                                                           Margin="0,0,0,4" />
+                                                <TextBlock Text="Perspective: TPP (Third-Person)"
+                                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                                           FontSize="11" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Grid.Column="2"
+                                                Background="{StaticResource BgPanelBrush}"
+                                                BorderBrush="{StaticResource BorderDarkBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="6"
+                                                Padding="14">
+                                            <StackPanel>
+                                                <TextBlock Text="SQUAD ROSTER"
+                                                           Foreground="{StaticResource AccentGoldBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="Bold"
+                                                           Margin="0,0,0,8" />
+                                                <TextBlock Text="{Binding Profile.Nickname, StringFormat='Slot 1 (Host): {0}'}"
+                                                           Foreground="{StaticResource StatusGreenBrush}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Margin="0,0,0,4" />
+                                                <TextBlock Text="Slot 2: [Open / Local Bot]"
+                                                           Foreground="{StaticResource TextMutedBrush}"
+                                                           FontSize="11"
+                                                           Margin="0,0,0,4" />
+                                                <TextBlock Text="Slot 3: [Open / Local Bot]"
+                                                           Foreground="{StaticResource TextMutedBrush}"
+                                                           FontSize="11"
+                                                           Margin="0,0,0,4" />
+                                                <TextBlock Text="Slot 4: [Open / Local Bot]"
+                                                           Foreground="{StaticResource TextMutedBrush}"
+                                                           FontSize="11" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- TAB 3: SETTINGS VIEW -->
+                        <StackPanel Visibility="{Binding IsSettingsActive, Converter={StaticResource BoolToVis}}">
+                            <Border Background="{StaticResource BgCardBrush}"
+                                    BorderBrush="{StaticResource BorderDarkBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="24"
+                                    Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="LAUNCHER &amp; GAME SETTINGS"
+                                               Foreground="{StaticResource AccentGoldBrush}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,16" />
+
+                                    <!-- Game Directory Setting -->
+                                    <TextBlock Text="Original Game Directory:"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12"
+                                               Margin="0,0,0,4" />
+                                    <TextBlock Text="Select the folder where Rules of Survival is installed (contains 'ros.exe' or 'Game\ros.exe')."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               Margin="0,0,0,8" />
+                                    <Grid Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Text="{Binding Settings.GameDirectory, UpdateSourceTrigger=PropertyChanged}"
+                                                 Background="{StaticResource BgPanelBrush}"
+                                                 Foreground="{StaticResource TextPrimaryBrush}"
+                                                 BorderBrush="{StaticResource BorderDarkBrush}"
+                                                 Padding="10,8"
+                                                 FontSize="12" />
+                                        <Button Grid.Column="1"
+                                                Content="Browse..."
+                                                Command="{Binding BrowseGameDirectoryCommand}"
+                                                Background="#252C37"
+                                                Foreground="{StaticResource TextPrimaryBrush}"
+                                                BorderThickness="0"
+                                                Padding="16,8"
+                                                Margin="8,0,0,0"
+                                                Cursor="Hand" />
+                                    </Grid>
+
+                                    <!-- Launch Arguments -->
+                                    <TextBlock Text="Launch Arguments:"
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12"
+                                               Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding Settings.LaunchArguments, UpdateSourceTrigger=PropertyChanged}"
+                                             Background="{StaticResource BgPanelBrush}"
+                                             Foreground="{StaticResource TextPrimaryBrush}"
+                                             BorderBrush="{StaticResource BorderDarkBrush}"
+                                             Padding="10,8"
+                                             FontSize="12"
+                                             Margin="0,0,0,16" />
+
+                                    <!-- Checkbox options -->
+                                    <CheckBox Content="Close launcher automatically when game starts"
+                                              IsChecked="{Binding Settings.AutoCloseOnLaunch}"
+                                              Foreground="{StaticResource TextSecondaryBrush}"
+                                              FontSize="12"
+                                              Margin="0,0,0,20" />
+
+                                    <!-- Save Button -->
+                                    <Button Content="Save Settings"
+                                            Command="{Binding SaveSettingsCommand}"
+                                            Background="{StaticResource AccentGoldBrush}"
+                                            Foreground="#000000"
+                                            FontWeight="Bold"
+                                            Padding="20,10"
+                                            HorizontalAlignment="Left"
+                                            Cursor="Hand" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- TAB 4: ABOUT VIEW -->
+                        <StackPanel Visibility="{Binding IsAboutActive, Converter={StaticResource BoolToVis}}">
+                            <Border Background="{StaticResource BgCardBrush}"
+                                    BorderBrush="{StaticResource BorderDarkBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="24">
+                                <StackPanel>
+                                    <TextBlock Text="ABOUT ROS REVIVAL"
+                                               Foreground="{StaticResource AccentGoldBrush}"
+                                               FontSize="20"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,12" />
+                                    <TextBlock Text="ROS Revival is an open-source, community-driven preservation initiative dedicated to keeping the authentic Rules of Survival PC client functional and accessible."
+                                               Foreground="{StaticResource TextPrimaryBrush}"
+                                               FontSize="12"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,12" />
+                                    <TextBlock Text="1. We preserve the original client identity without cartoon redesigns or replacement assets.&#x0a;2. We do not modify ros.exe, assets.npk, or script.npk.&#x0a;3. We operate 100% offline with local Guest Mode and zero mandatory accounts.&#x0a;4. All game rights, trademarks, and original assets belong to NetEase."
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               FontSize="11"
+                                               TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
                     </Grid>
                 </ScrollViewer>
             </Grid>
