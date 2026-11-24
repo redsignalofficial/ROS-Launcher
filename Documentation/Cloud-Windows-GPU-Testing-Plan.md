@@ -1,157 +1,152 @@
-# ROS REVIVAL — CLOUD WINDOWS GPU TESTING PLAN
+# ROS REVIVAL — ZERO-BUDGET WINDOWS GPU TESTING STRATEGY
 
 **Project:** ROS REVIVAL (Rules of Survival Preservation Project)  
-**Objective:** Execute Real Rules of Survival (`ros.exe`) on a Cloud Windows GPU Environment without Physical PC Hardware  
-**Document Version:** 1.1.0  
-**Status:** PROPOSED — PENDING DEVELOPER APPROVAL  
+**Objective:** Execute Real Rules of Survival (`ros.exe`) with 3D DirectX GPU Acceleration Under a Strict **$0.00 Out-of-Pocket** Policy  
+**Document Version:** 2.0.0  
+**Status:** REVISED FOR ZERO BUDGET — AWAITING COMMUNITY / TESTER ONBOARDING  
 
 ---
 
-## 1. Executive Summary & Problem Statement
+## 1. Executive Summary & Policy Shift
 
-### The Problem
-- The developer manages the project from a mobile device and does not have a physical Windows PC.
-- Standard GitHub-hosted runners (`windows-latest`) run in a headless background service container (Session 0) with a software virtual display driver (`Microsoft Basic Display Driver`), lacking the physical 3D GPU and DirectX hardware context required by the NeoX game engine (`ros.exe`).
-- Test 1 is currently in status **`TEST_BLOCKED`** because executing `ros.exe` requires:
-  1. A 64-bit Windows operating system (Windows 10, 11, or Windows Server with Desktop Experience).
-  2. A dedicated physical/virtualized GPU (NVIDIA, AMD, or Intel Iris) with DirectX 9.0c / DirectX 11 hardware acceleration.
-  3. An active interactive user desktop session (Session 1) capable of window rendering.
-  4. The authorized ~6.0 GB Rules of Survival game client files (`ros.exe`, `assets.npk`, `script.npk`).
+### Background & Constraint
+- The developer uses a mobile device and does not have a personal Windows PC.
+- Attempting commercial cloud free trials (Google Cloud Platform) failed because virtual/prepaid debit cards are declined by payment gateway fraud/AVS verification.
+- **Strict Project Directive:**
+  - **Zero Paid Cloud Services:** No GCP, AWS, Shadow PC, AirGPU, or paid hosting of any kind.
+  - **Zero Card Requirements:** No services requiring credit or debit card verification.
+  - **Zero Policy Bypasses:** No circumventing provider terms, payment checks, or free-tier quotas.
+  - **Absolute Reality:** Never simulate 3D game execution on headless Linux or report fake success. `TEST 1` remains **`TEST_BLOCKED`** until verified on real Windows GPU hardware.
 
-### The Solution
-Provision a **temporary, on-demand Windows GPU Cloud Virtual Machine** that registers as a GitHub Actions self-hosted runner with labels:
-```
-self-hosted, Windows, ROS-Test, Interactive, GPU
-```
-This machine runs only during test execution (15–30 minutes per run), executes the real `ros.exe` process, captures authentic 1080p PNG screenshots and MP4 video recordings, and uploads the evidence directly back to GitHub Actions as downloadable artifacts.
-
-> [!IMPORTANT]
-> **Zero Out-of-Pocket Commitment Policy**
-> No cloud instance will be purchased, rented, deployed, or activated without your explicit review and approval. Multiple free-tier and low-cost options are detailed below.
+### The Zero-Budget Solution
+Pivot to an **Authorized Volunteer Community Testing Model** and **Zero-Card Free Tier Programs**. A community contributor with an existing Windows gaming PC connects as a temporary, secured GitHub Actions self-hosted runner, or runs the automated verification script locally and submits unmanipulated visual evidence.
 
 ---
 
-## 2. Cloud Provider Comparison & Cost Analysis
+## 2. Comparison of Legitimate Zero-Cost Testing Options
 
-| Provider / Service | GPU Hardware | OS & Desktop Session | Free Credits / Trial | Hourly Cost | Estimated Cost Per Test Run (30 min) | Monthly 24/7 (Reference) |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: |
-| **Google Cloud Platform (GCP)** *(Recommended for $0)* | NVIDIA Tesla T4 (16GB VRAM) | Windows Server 2022 + NVIDIA GRID (Interactive Session 1) | **$300 Free Credit** (90 days) | ~$0.71 / hr | **$0.00** *(Deducted from free credit)* | ~$510 / mo |
-| **Microsoft Azure** *(Recommended for $0)* | NVIDIA A10 (`NVadsA10v5`) or Tesla M60 | Windows 10/11 Multi-Session or Server 2022 | **$200 Free Credit** (30 days) | ~$0.75 / hr | **$0.00** *(Deducted from free credit)* | ~$540 / mo |
-| **AWS EC2 (Spot Instance)** *(Lowest Pay-As-You-Go)* | NVIDIA Tesla T4 (`g4dn.xlarge`, 4 vCPU, 16GB RAM) | Windows Server 2022 with Desktop Experience | AWS Free Tier (Standard credits) | **~$0.35 – $0.45 / hr** | **~$0.18 – $0.23** | ~$250 / mo |
-| **AirGPU** *(Gaming-Optimized Pay-As-You-Go)* | NVIDIA Tesla T4 / L4 (GTX 1080 / RTX class) | Windows 10/11 Desktop + Parsec / RDP | Credit-based ($10 min deposit) | ~$0.65 – $0.90 / hr | **~$0.33 – $0.45** | Pay-as-you-go + $3.50/mo storage |
-| **Shadow PC** *(Dedicated Monthly Cloud PC)* | NVIDIA RTX 2000 Ada / RTX 3070 equivalent | Full Windows 11 Home/Pro Desktop (Mobile iOS/Android App) | None | N/A (Flat subscription) | Included in flat fee | **$29.99 – $34.99 / mo** |
-
----
-
-## 3. Deep Dive: GCP Windows GPU Configuration & Quotas
-
-If **Google Cloud Platform (GCP)** is selected to leverage the $300 free trial credit:
-
-### Itemized GCP Hourly Cost Breakdown
-- **Compute Instance (`n1-standard-4`):** 4 vCPUs, 15 GB RAM = **$0.190 / hr**
-- **GPU Accelerator:** 1x NVIDIA Tesla T4 = **$0.350 / hr**
-- **Windows Server License:** 4 vCPUs × $0.040 = **$0.160 / hr**
-- **Storage:** 50 GB Balanced Persistent Disk = **$0.007 / hr** (~$5.00/mo)
-- **Total Combined Hourly Cost:** **~$0.707 / hour**
-- **Test Session (30 minutes):** **~$0.35** (Fully covered by the $300 credit; **$0.00 out of pocket**).
-
-### Quota Prerequisite & Approval Reality
-- New Google Cloud accounts default to a **GPU quota of 0** (`GPUS_ALL_REGIONS = 0` / `NVIDIA_T4_GPUS = 0`).
-- To provision an NVIDIA T4, an account owner must submit a quota increase request in the GCP Console (**IAM & Admin > Quotas > Compute Engine API > GPUs (all regions) > Request Increase to 1**).
-- Approval typically takes between 15 minutes to 24 hours. Google sometimes requires upgrading from the free trial billing tier (with a verified card) before granting GPU quota.
-- **Alternative if GCP quota is delayed:** Azure ($200 free credit) or an AWS EC2 `g4dn.xlarge` Spot Instance (~$0.35/hr, no monthly commitment).
+| Testing Method | Hardware Environment | Windows Desktop & DirectX 3D? | Credit Card Required? | Out-of-Pocket Cost | Feasibility & Recommendation |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **1. Volunteer Community Contributor as Self-Hosted Runner** | Physical Windows PC (NVIDIA / AMD / Intel GPU) | **YES** (Native Session 1, True Direct3D) | **NO** | **$0.00** | ⭐ **RECOMMENDED PRIMARY**: 100% automated via GitHub Actions; authentic gaming hardware. |
+| **2. Manual Community Beta Testing Protocol** | Physical Windows PC (NVIDIA / AMD GPU) | **YES** (Native Desktop) | **NO** | **$0.00** | ⭐ **RECOMMENDED SECONDARY**: Volunteer downloads launcher ZIP, runs test, uploads raw logs & PNG screenshots. |
+| **3. Azure for Students (GitHub Student Pack)** | Cloud GPU VM (`NVadsA10v5`) | **YES** (Windows Server + GPU) | **NO** (Requires student `.edu` email) | **$0.00** ($100 credit) | **VIABLE IF ELIGIBLE**: Valid only if the developer or a collaborator has a verified student email. |
+| **4. Google Colab / Kaggle / Paperspace** | Cloud Linux Container (Ubuntu) | ❌ **NO** (Headless Linux only, no Windows DirectX) | NO | $0.00 | ⛔ **DISQUALIFIED**: Headless Linux cannot run Windows DirectX 9/11 NeoX game client. |
+| **5. Oracle Cloud Always Free** | Cloud VM (ARM / AMD Micro) | ❌ **NO** (No free GPUs; CPU only) | YES | $0.00 | ⛔ **DISQUALIFIED**: Free tier has 0 GPUs; GPU shapes require paid upgrade and card. |
 
 ---
 
-## 4. Interactive Remote Desktop Architecture
+## 3. Disqualification Analysis of Headless Linux "Free GPUs"
 
-DirectX games like Rules of Survival (`ros.exe`) require an active user desktop (Session ID ≥ 1) and fail with `D3DERR_NOTAVAILABLE` when launched in a background Windows Service session (Session 0).
+It is tempting to look at free cloud GPU environments like Google Colab, Kaggle, or HuggingFace, but they are technically incapable of executing the original Rules of Survival PC game:
+
+1. **Operating System Incompatibility:** They provide headless Ubuntu Linux Docker containers. Rules of Survival (`ros.exe`) is a Win32/x64 PE binary compiled against Windows DirectX (Direct3D 9/11).
+2. **Missing Desktop Session:** Colab and Kaggle have no graphical desktop session (no X11/Wayland display server, no Windows Session 1). `ros.exe` requires a window handle to initialize the engine viewport.
+3. **WINE / Proton Incompatibility:** The original client relies on NetEase anti-cheat drivers (`NEACSDK.cfg`, `h45na.prot`) and Direct3D middleware that fail or crash under translation layers without modifying game files.
+4. **Preservation Policy Violation:** Running through experimental emulation layers violates our rule: *"Do not claim game functionality works until verified on native Windows."*
+
+---
+
+## 4. Volunteer Community Runner Architecture (Primary Zero-Cost Solution)
+
+The most legitimate, authentic, and zero-cost approach is utilizing a Windows gaming PC owned by a trusted community volunteer, collaborator, or tester:
 
 ```mermaid
 flowchart TD
-    subgraph Mobile Device
-        Mobile[Developer Mobile Phone: Chrome Remote Desktop App / Browser]
+    subgraph Mobile Developer
+        Dev[Mobile Browser / GitHub App: Triggers ros-real-launch-test.yml]
     end
 
-    subgraph GitHub Cloud
-        GH[GitHub Actions Workflow Dispatch]
-        Artifacts[GitHub Actions Artifacts: Screenshots & Videos]
+    subgraph GitHub Cloud Repository (redsignalofficial/ROS-Launcher)
+        Repo[Actions Queue: Job waiting for 'self-hosted, Windows, GPU']
+        Artifacts[GitHub Actions Artifacts: Real Screenshots & Video]
     end
 
-    subgraph Cloud Windows GPU VM
-        AutoLogon[Windows Sysinternals Autologon: Session 1]
-        CRD[Chrome Remote Desktop Host Service]
-        Runner[GitHub Actions Self-Hosted Runner (run.cmd)]
-        DirectX[NVIDIA GPU Driver + DirectX 9/11 Acceleration]
-        Game[ros.exe + assets.npk + script.npk]
-        Capture[FFmpeg MP4 Grab & GDI Screenshot Capture]
+    subgraph Volunteer Windows Gaming PC
+        Runner[Official GitHub Actions Runner (run.cmd in User Session)]
+        GPU[Hardware GPU: NVIDIA GeForce / AMD Radeon]
+        Game[Authorized Original Game: RosInfinity/Game/ros.exe]
+        Capture[run-ros-real-launch.ps1: Hashing, FFmpeg MP4, PNGs]
     end
 
-    Mobile -->|View Live Game Screen on Phone| CRD
-    CRD --> AutoLogon
-    GH -->|Trigger Test 1 Outbound 443| Runner
-    AutoLogon --> Runner
-    Runner -->|Launch Game with 3D Context| Game
-    DirectX --> Game
-    Game --> Capture
-    Capture -->|Upload Real Evidence| Artifacts
+    Dev -->|1. Tap 'Run workflow' on Phone| Repo
+    Runner -->|2. Outbound HTTPS 443 Polls Job| Repo
+    Runner -->|3. Executes ros.exe with Physical GPU Context| Game
+    GPU -->|Renders 3D NeoX Graphics| Game
+    Capture -->|4. Verifies Hashes & Captures Visuals| Game
+    Capture -->|5. Uploads Authentic Evidence| Artifacts
 ```
 
-### Safe Interactive Setup: Chrome Remote Desktop (CRD)
-1. **Firewall Safe:** Connects entirely outbound over WebRTC via Google servers.
-2. **No Port Openings:** Inbound Windows RDP port (3389) remains closed, protecting the VM from unauthorized network scans.
-3. **Mobile Accessible:** You can open the Chrome Remote Desktop app on your phone, see the genuine Windows desktop, and view the game window live on your screen.
-4. **Sysinternals Autologon:** Ensures the VM automatically logs into the desktop on boot so the GitHub Actions runner starts in Session 1, even if you are not actively connected via remote desktop.
+### Why This Works Perfectly:
+1. **Zero Financial Cost:** Uses existing consumer hardware already owned by a community member.
+2. **Zero Card Requirements:** No accounts to create on AWS/GCP, no risk of card declines or recurring billing.
+3. **Authentic Gaming Environment:** Tests `ros.exe` on real consumer gaming GPUs (e.g., GTX 1060, RTX 2060, RTX 3060, RX 580) where Rules of Survival was originally meant to run.
+4. **Outbound Security:** The GitHub Actions runner software only makes **outbound HTTPS connections** to `github.com`. It requires no open ports, no port forwarding, and no router configuration on the volunteer's network.
 
 ---
 
-## 5. Secure Game File Transfer (Zero Public Git Leakage)
+## 5. Step-by-Step Volunteer Runner Setup Guide
 
-Per strict preservation and copyright rules:
-> *“Do not upload proprietary ROS game files into the Git repository.”*
+If you or a community volunteer has access to a Windows PC with a dedicated GPU, here is the exact 5-minute setup:
 
-### Approved Transfer Protocol
-The 6.0 GB Rules of Survival client (`RosInfinity-client-1.9.0.zip`) will be installed on the cloud VM using direct download on the VM:
+### Step 1: Generate Runner Token on GitHub (Mobile or PC)
+1. Go to repository settings: **[Settings > Actions > Runners > New self-hosted runner](https://github.com/redsignalofficial/ROS-Launcher/settings/actions/runners/new)**.
+2. Select **Windows** and **x64**.
+3. Copy the registration token shown on the page.
+
+### Step 2: Download & Configure on Volunteer Windows PC
+In an Administrator PowerShell window:
 ```powershell
-$downloadUrl = "https://dl.rosinfinity.com/RosInfinity-client-1.9.0.zip"
-$destZip = "C:\Temp\RosInfinity.zip"
-$targetDir = "C:\Games\RulesOfSurvival"
+# 1. Create runner directory
+mkdir C:\actions-runner; cd C:\actions-runner
 
-Invoke-WebRequest -Uri $downloadUrl -OutFile $destZip
-Expand-Archive -Path $destZip -DestinationPath $targetDir -Force
-Remove-Item $destZip -Force
+# 2. Download official GitHub Actions runner
+Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-win-x64-2.321.0.zip -OutFile runner.zip
+Expand-Archive -Path runner.zip -DestinationPath . -Force
+Remove-Item runner.zip
 
-# Set persistent system environment variable
-[System.Environment]::SetEnvironmentVariable("ROS_GAME_DIR", "$targetDir\RosInfinity\Game", "Machine")
+# 3. Configure runner with required labels
+./config.cmd --url https://github.com/redsignalofficial/ROS-Launcher --token <PASTE_REGISTRATION_TOKEN> --labels "self-hosted,Windows,ROS-Test,Interactive,GPU" --unattended
+
+# 4. Set game path environment variable (pointing to volunteer's Game folder)
+[System.Environment]::SetEnvironmentVariable("ROS_GAME_DIR", "C:\Games\RulesOfSurvival\Game", "Machine")
 ```
-- Completely isolated to the private VM; zero bytes of proprietary game files touch GitHub.
+
+### Step 3: Start Runner in Interactive Desktop
+In the volunteer's standard desktop session:
+```powershell
+./run.cmd
+```
+*The runner connects and displays `Listening for Jobs`.*
+
+### Step 4: Execute Test 1 from Your Phone
+1. Open GitHub on your mobile browser: **[Actions > Test 1 - Original ROS Real Launch](https://github.com/redsignalofficial/ROS-Launcher/actions/workflows/ros-real-launch-test.yml)**.
+2. Tap **Run workflow**.
+3. The volunteer's PC automatically executes `run-ros-real-launch.ps1`, starts `ros.exe`, takes genuine in-game screenshots and MP4 video, re-verifies file hashes, and uploads the artifacts.
+4. You download the genuine evidence directly to your phone.
+5. The volunteer presses `Ctrl+C` in the terminal to close the runner.
 
 ---
 
-## 6. Workflow Integration & Test 1 Artifact Return
+## 6. Offline Launcher Development While Awaiting Hardware
 
-1. **Trigger:** You tap **Run workflow** on `ros-real-launch-test.yml` from GitHub on your phone.
-2. **Execute:** The self-hosted runner executes `run-ros-real-launch.ps1`.
-3. **Capture:**
-   - Hashes `ros.exe`, `assets.npk`, `script.npk` before launch.
-   - Launches `ros.exe` in `C:\Games\RulesOfSurvival\RosInfinity\Game`.
-   - Records desktop video via FFmpeg and captures in-game screenshots.
-   - Observes startup screen and connection timeout state.
-   - Re-hashes files to verify 100% immutability.
-4. **Return:**
-   - Uploads `ROS-Real-Launch-Screenshots`, `ROS-Real-Launch-Videos`, `ROS-Real-Launch-Logs`, and `ROS-Real-Launch-Report` back to the GitHub workflow run.
-   - You download the authentic visual evidence directly to your mobile device.
+While community testing hardware is organized, development does **not** stop. We will continue advancing the project 100% offline and cost-free:
+
+1. **Lobby & UI Maturation:** Enhance the Custom Lobby interface, room configurations, and map selections.
+2. **Offline Player Profiles:** Add local stats, loadout customization, and local match preset saving.
+3. **Hash Manifest Automation:** Build automated SHA-256 integrity manifest generation tools for game directory verification.
+4. **Unit Test Coverage:** Continue maintaining 100% passing automated test coverage across Linux and Windows cloud CI.
 
 ---
 
-## 7. Next Steps & Decision Options
+## 7. Status & Non-Negotiable Boundaries
 
-Please select one of the following paths:
+- **`TEST 1` Remains:** **`TEST_BLOCKED`** (truthfully reflecting that `ros.exe` has not executed on a physical GPU yet).
+- **Cloud Spending:** **$0.00**. No paid cloud services will ever be activated.
+- **Game Files:** Proprietary game files remain strictly outside GitHub.
 
-- **Option A (GCP $0 Free Trial):** Set up a free Google Cloud account, request 1x T4 GPU quota, and provision a temporary Windows Server VM.
-- **Option B (AWS Spot Pay-As-You-Go):** Spin up an AWS `g4dn.xlarge` Spot Instance on demand (~35¢/hr, under 25¢ per test session).
-- **Option C (Shadow PC Dedicated Gaming VM):** Use Shadow PC ($29.99/mo) with full mobile app interaction.
-- **Option D (Hold / Alternative Strategy):** Defer Test 1 execution and continue refining the offline launcher features.
+---
 
-> [!NOTE]
-> No paid cloud instances have been created or billed. We remain stopped awaiting your direction.
+### Recommended Next Action
+Adopt **Option 1 (Volunteer Community Contributor as a Self-Hosted Runner)** as our official strategy for unblocking Test 1. 
+
+**STOPPED. Awaiting your confirmation.**
