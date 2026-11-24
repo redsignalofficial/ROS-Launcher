@@ -221,6 +221,18 @@ $reportJson = Join-Path $reportsDir "Real-Play-Test-Results.json"
 $testResults | ConvertTo-Json -Depth 4 | Set-Content -Path $reportJson -Encoding utf8
 
 $reportMd = Join-Path $reportsDir "Windows-Run-Report.md"
+$shotListStr = if ((Get-ChildItem $screenshotsDir -Filter *.png).Count -gt 0) {
+    (Get-ChildItem $screenshotsDir -Filter *.png | ForEach-Object { "  - " + $_.Name }) -join "`n"
+} else { "  - None captured" }
+
+$videoListStr = if ((Get-ChildItem $videosDir -Filter *.mp4).Count -gt 0) {
+    (Get-ChildItem $videosDir -Filter *.mp4 | ForEach-Object { "  - " + $_.Name }) -join "`n"
+} else { "  - None captured" }
+
+$logListStr = if ((Get-ChildItem $logsDir).Count -gt 0) {
+    (Get-ChildItem $logsDir | ForEach-Object { "  - " + $_.Name }) -join "`n"
+} else { "  - None" }
+
 $mdContent = @"
 # ROS REVIVAL — Windows Real-Play Evidence Report
 
@@ -252,11 +264,11 @@ $mdContent = @"
 ## Evidence Manifest
 
 - **Screenshots:**
-$((Get-ChildItem $screenshotsDir -Filter *.png | ForEach-Object { "  - `$_`" }) -join "`n")
+$shotListStr
 - **Videos:**
-$((Get-ChildItem $videosDir -Filter *.mp4 | ForEach-Object { "  - `$_`" }) -join "`n")
+$videoListStr
 - **Logs:**
-$((Get-ChildItem $logsDir | ForEach-Object { "  - `$_`" }) -join "`n")
+$logListStr
 "@
 
 Set-Content -Path $reportMd -Value $mdContent -Encoding utf8

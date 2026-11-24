@@ -52,14 +52,16 @@ jobs:
           ./Testing/run-windows-tests.ps1 -PublishDir "./artifacts/publish" -EvidenceDir "./Testing/Evidence"
 
       - name: Upload Artifact - ROS-REVIVAL-Build
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ROS-REVIVAL-Build
           path: ./artifacts/publish/
           retention-days: 90
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload Artifact - ROS-REVIVAL-Test-Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ROS-REVIVAL-Test-Reports
@@ -70,6 +72,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Artifact - ROS-REVIVAL-Screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ROS-REVIVAL-Screenshots
@@ -78,6 +81,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Artifact - ROS-REVIVAL-Videos
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ROS-REVIVAL-Videos
@@ -86,6 +90,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Upload Artifact - ROS-REVIVAL-Logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ROS-REVIVAL-Logs
@@ -94,6 +99,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Append Test Results to Step Summary
+        if: always()
         shell: pwsh
         run: |
           $reportPath = "./Testing/Evidence/Reports/Windows-Run-Report.md"

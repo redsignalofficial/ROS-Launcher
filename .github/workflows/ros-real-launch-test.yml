@@ -1,0 +1,89 @@
+name: Test 1 - Original ROS Real Launch
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_runner:
+        description: 'Target Windows Test Environment'
+        required: true
+        type: choice
+        default: 'self-hosted-gpu'
+        options:
+          - 'self-hosted-gpu'
+          - 'windows-latest-audit'
+      custom_game_dir:
+        description: 'Optional path to ROS Game directory on runner (defaults to ROS_GAME_DIR env)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  ros-real-launch:
+    name: Run Real ros.exe Process & Collect Evidence
+    runs-on: ${{ inputs.target_runner == 'windows-latest-audit' && 'windows-latest' || fromJSON('["self-hosted", "Windows", "ROS-Test", "Interactive", "GPU"]') }}
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Execute Original ROS Real Launch & Diagnostics
+        shell: pwsh
+        env:
+          ROS_GAME_DIR: ${{ inputs.custom_game_dir || env.ROS_GAME_DIR }}
+        run: |
+          ./Testing/run-ros-real-launch.ps1 `
+            -GameDir "${{ inputs.custom_game_dir }}" `
+            -EvidenceDir "./Testing/Evidence/ROS-Real-Launch" `
+            -TestTimeoutSeconds 35
+
+      - name: Upload Artifact - ROS-Real-Launch-Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-Real-Launch-Screenshots
+          path: ./Testing/Evidence/ROS-Real-Launch/Screenshots/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-Real-Launch-Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-Real-Launch-Videos
+          path: ./Testing/Evidence/ROS-Real-Launch/Videos/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-Real-Launch-Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-Real-Launch-Logs
+          path: ./Testing/Evidence/ROS-Real-Launch/Logs/
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Upload Artifact - ROS-Real-Launch-Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ROS-Real-Launch-Report
+          path: |
+            ./Testing/Evidence/ROS-Real-Launch/Reports/
+            Documentation/ROS-Real-Launch-Test-Report.md
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Append Test Results to Step Summary
+        if: always()
+        shell: pwsh
+        run: |
+          $reportPath = "Documentation/ROS-Real-Launch-Test-Report.md"
+          if (Test-Path $reportPath) {
+            Get-Content -Path $reportPath | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          } else {
+            "## ⚠️ Test Report Not Found" >> $env:GITHUB_STEP_SUMMARY
+          }
